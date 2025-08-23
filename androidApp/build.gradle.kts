@@ -7,18 +7,28 @@ android {
     namespace = "org.example.wan.kuikly"
     compileSdk = 34
     defaultConfig {
-        applicationId = "org.example.wan.kuikly"
-        minSdk = 23
-        targetSdk = 30
+        applicationId = "org.example.wan.kuikly.android"
+        minSdk = 21
+        targetSdk = 34
         versionCode = 1
         versionName = "1.0"
     }
 
     buildTypes {
-        getByName("release") {
+        debug {
             isMinifyEnabled = false
+            isShrinkResources = false
+            signingConfig = signingConfigs.getByName("debug")
         }
+        release {
+            isMinifyEnabled = true
+            isShrinkResources = true
+            proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
+            signingConfig = signingConfigs.getByName("debug")
+        }
+//        create("newType") {}
     }
+
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_1_8
         targetCompatibility = JavaVersion.VERSION_1_8
@@ -26,6 +36,14 @@ android {
     kotlinOptions {
         jvmTarget = "1.8"
     }
+//    java {
+//        toolchain {
+//            languageVersion = JavaLanguageVersion.of(17)
+//        }
+//    }
+//    kotlin {
+//        jvmToolchain(17)
+//    }
 }
 
 dependencies {
