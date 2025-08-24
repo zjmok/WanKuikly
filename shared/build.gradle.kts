@@ -7,6 +7,7 @@ plugins {
     id("com.google.devtools.ksp")
     id("maven-publish")
     id("com.tencent.kuikly-open.kuikly")
+    kotlin("plugin.serialization")
 
 }
 
@@ -60,6 +61,18 @@ kotlin {
             dependencies {
                 implementation("com.tencent.kuikly-open:core:${Version.getKuiklyVersion()}")
                 implementation("com.tencent.kuikly-open:core-annotations:${Version.getKuiklyVersion()}")
+
+                // 需要注意，使用的库是否支持多平台，纯 java/kotlin 实现
+                // kuiklyx 协程
+                implementation("com.tencent.kuiklyx-open:coroutines:${Version.KUIKLYX_COROUTINES_VERSION}")
+                // kotlinx-serialization
+                // https://mvnrepository.com/artifact/org.jetbrains.kotlinx/kotlinx-serialization-json
+                implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.8.1")
+                // ktor
+//                val ktorVersion = "3.2.3"
+//                implementation("io.ktor:ktor-client-core:$ktorVersion") // 核心库
+//                implementation("io.ktor:ktor-client-content-negotiation:$ktorVersion") // 内容协商（用于JSON序列化）
+//                implementation("io.ktor:ktor-serialization-kotlinx-json:$ktorVersion") // Kotlinx.serialization JSON支持
 
             }
         }
@@ -122,6 +135,7 @@ dependencies {
         add("kspIosSimulatorArm64", this)
         add("kspJs", this)
     }
+
 }
 
 android {

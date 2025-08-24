@@ -16,7 +16,7 @@ android {
 
     buildTypes {
         debug {
-            isMinifyEnabled = false
+            isMinifyEnabled = true // false 打包会报错
             isShrinkResources = false
             signingConfig = signingConfigs.getByName("debug")
         }

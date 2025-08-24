@@ -1,1 +1,12 @@
-[]
+[
+  {
+    "moduleId": "com.tencent.kuiklyx-open:coroutines:1.3.0-2.0.21",
+    "file": "Z:\\WorkspacesWanAndroid\\WanKuikly\\.kotlin\\metadata\\kotlinTransformedCInteropMetadataLibraries\\com.tencent.kuiklyx-open-coroutines-1.3.0-2.0.21-iosMain-cinterop\\com.tencent.kuiklyx-open_coroutines-cinterop-OpenKuiklyIOSRender-iLv20Q.klib",
+    "sourceSetName": "iosMain"
+  },
+  {
+    "moduleId": "org.jetbrains.kotlinx:atomicfu:0.23.2",
+    "file": "Z:\\WorkspacesWanAndroid\\WanKuikly\\.kotlin\\metadata\\kotlinTransformedCInteropMetadataLibraries\\org.jetbrains.kotlinx-atomicfu-0.23.2-nativeMain-cinterop\\org.jetbrains.kotlinx_atomicfu-cinterop-interop-yBS35w.klib",
+    "sourceSetName": "nativeMain"
+  }
+]

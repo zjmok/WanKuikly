@@ -1,5 +1,6 @@
 package org.example.wan.kuikly
 
+import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import android.graphics.Color
@@ -7,12 +8,17 @@ import android.os.Bundle
 import android.view.View
 import android.view.ViewGroup
 import android.view.WindowManager
+import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import com.tencent.kuikly.core.render.android.IKuiklyRenderExport
 import com.tencent.kuikly.core.render.android.adapter.KuiklyRenderAdapterManager
 import com.tencent.kuikly.core.render.android.css.ktx.toMap
-import com.tencent.kuikly.core.render.android.expand.KuiklyRenderViewBaseDelegatorDelegate
 import com.tencent.kuikly.core.render.android.expand.KuiklyRenderViewBaseDelegator
+import com.tencent.kuikly.core.render.android.expand.KuiklyRenderViewBaseDelegatorDelegate
+import com.tencent.kuikly.core.render.android.expand.module.getKuiklyEventName
+import com.tencent.kuikly.core.render.android.expand.module.getKuiklyEventParams
+import com.tencent.kuikly.core.render.android.expand.module.registerKuiklyBroadcastReceiver
+import com.tencent.kuikly.core.render.android.expand.module.unregisterKuiklyBroadcastReceiver
 import org.example.wan.kuikly.adapter.KRColorParserAdapter
 import org.example.wan.kuikly.adapter.KRFontAdapter
 import org.example.wan.kuikly.adapter.KRImageAdapter
@@ -38,9 +44,34 @@ class KuiklyRenderActivity : AppCompatActivity(), KuiklyRenderViewBaseDelegatorD
             return if (pn.isNotEmpty()) {
                 return pn
             } else {
-                "router"
+                // Kuikly 入口 page
+//                "router"
+                "main"
             }
         }
+
+    // 接收 Kuikly 通知
+    private val kuiklyReceiver = object : BroadcastReceiver() {
+        override fun onReceive(context: Context, intent: Intent) {
+            // 事件名称
+            val eventName = intent.getKuiklyEventName()
+            // 数据
+            val data = intent.getKuiklyEventParams()
+
+            when (eventName) {
+                // toast
+                "toast" -> {
+                    val message = try {
+                        data.getString("message")
+                    } catch (e: Exception) {
+                        ""
+                    }
+                    // Android 执行
+                    Toast.makeText(this@KuiklyRenderActivity, message, Toast.LENGTH_SHORT).show()
+                }
+            }
+        }
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -51,11 +82,15 @@ class KuiklyRenderActivity : AppCompatActivity(), KuiklyRenderViewBaseDelegatorD
         loadingView = findViewById(R.id.hr_loading)
         errorView = findViewById(R.id.hr_error)
         kuiklyRenderViewDelegator.onAttach(hrContainerView, "", pageName, createPageData())
+
+        registerKuiklyBroadcastReceiver(kuiklyReceiver)
     }
 
     override fun onDestroy() {
         super.onDestroy()
         kuiklyRenderViewDelegator.onDetach()
+
+        unregisterKuiklyBroadcastReceiver(kuiklyReceiver)
     }
 
     override fun onPause() {
@@ -138,4 +173,5 @@ class KuiklyRenderActivity : AppCompatActivity(), KuiklyRenderViewBaseDelegatorD
             }
         }
     }
+
 }

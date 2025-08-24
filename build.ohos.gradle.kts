@@ -1,36 +1,15 @@
+buildscript {
+    dependencies {
+        classpath(BuildPlugin.kuiklyOhos)
+    }
+}
+
 plugins {
     //trick: for the same plugin versions in all sub-modules
-    id("com.android.application").version("7.4.2").apply(false)
-    id("com.android.library").version("7.4.2").apply(false)
-    kotlin("android").version("2.0.21-KBA-004").apply(false)
-    kotlin("multiplatform").version("2.0.21-KBA-004").apply(false)
-    id("com.google.devtools.ksp").version("2.0.21-1.0.27").apply(false)
+    id("com.android.application").version(Version.AGP_VERSION).apply(false)
+    id("com.android.library").version(Version.AGP_VERSION).apply(false)
+    kotlin("android").version(Version.KOTLIN_OHOS_VERSION).apply(false)
+    kotlin("multiplatform").version(Version.KOTLIN_OHOS_VERSION).apply(false)
+    id("com.google.devtools.ksp").version(Version.KSP_VERSION).apply(false)
 
-}
-
-buildscript {
-    repositories {
-        gradlePluginPortal()
-        google()
-        mavenCentral()
-        mavenLocal()
-        maven {
-            url = uri("https://central.sonatype.com/repository/maven-snapshots/")
-        }
-    }
-
-    dependencies {
-        classpath(BuildPlugin.kuikly)
-    }
-}
-
-allprojects {
-    repositories {
-        google()
-        mavenCentral()
-        mavenLocal()
-        maven {
-            url = uri("https://central.sonatype.com/repository/maven-snapshots/")
-        }
-    }
 }
