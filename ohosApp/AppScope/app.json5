@@ -1,6 +1,6 @@
 {
   "app": {
-    "bundleName": "org.example.wan.kuikly",
+    "bundleName": "org.example.wan.kuikly.ohos",
     "vendor": "example",
     "versionCode": 1000000,
     "versionName": "1.0.0",

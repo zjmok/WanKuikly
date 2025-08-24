@@ -6,6 +6,7 @@
     <application
         android:name=".KRApplication"
         android:allowBackup="false"
+        android:label="WanKuikly"
         android:networkSecurityConfig="@xml/network_security_config"
         android:supportsRtl="true"
         android:theme="@style/Theme.AppCompat.NoActionBar">
