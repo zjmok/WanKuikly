@@ -8,6 +8,7 @@ import com.tencent.kuikly.core.base.attr.ImageUri
 import com.tencent.kuikly.core.directives.vfor
 import com.tencent.kuikly.core.directives.vforIndex
 import com.tencent.kuikly.core.layout.FlexDirection
+import com.tencent.kuikly.core.nvi.serialization.json.JSONObject
 import com.tencent.kuikly.core.reactive.handler.observable
 import com.tencent.kuikly.core.reactive.handler.observableList
 import com.tencent.kuikly.core.views.Image
@@ -24,7 +25,7 @@ import org.example.wan.kuikly.page.main.view.HomeList
 import org.example.wan.kuikly.page.main.view.Person
 import org.example.wan.kuikly.page.main.view.SquareTree
 
-internal class TabItemData {
+internal class MainTabItem {
     var id by observable("")
     var tabTitle by observable("")
     var tabImg by observable("")
@@ -37,9 +38,9 @@ internal class MainPage : BasePager() {
     private var pageListRef: ViewRef<PageListView<*, *>>? = null
     private var scrollParams: ScrollParams? by observable(null)
 
-    private val tabDataList by observableList<TabItemData>()
+    private val tabDataList by observableList<MainTabItem>()
 
-    private var defaultIndex = 2
+    private var defaultIndex = 1
 
     override fun created() {
         super.created()
@@ -56,7 +57,7 @@ internal class MainPage : BasePager() {
             )
         tabDataList.clear()
         tabDataList.addAll(list.map {
-            TabItemData().apply {
+            MainTabItem().apply {
                 tabTitle = it["title"] ?: ""
                 tabImg = it["img"] ?: ""
             }
@@ -69,6 +70,7 @@ internal class MainPage : BasePager() {
         println("pagerData.pageViewWidth = ${pagerData.pageViewWidth}")
         println("pagerData.safeAreaInsets = ${pagerData.safeAreaInsets}")
 
+        println("MainPage index = $defaultIndex")
     }
 
     override fun body(): ViewBuilder {
@@ -139,6 +141,7 @@ internal class MainPage : BasePager() {
                         }
                     }
                 }
+                // 分割线
                 View {
                     attr {
                         height(0.5f)
@@ -146,6 +149,7 @@ internal class MainPage : BasePager() {
                         backgroundColor(Color.GRAY)
                     }
                 }
+                // List 必须设置宽高
                 PageList {
                     ref {
                         ctx.pageListRef = it
@@ -163,7 +167,7 @@ internal class MainPage : BasePager() {
                             pagerData.pageViewHeight
                                     - pagerData.safeAreaInsets.top
                                     - pagerData.safeAreaInsets.bottom
-                                    - 60f
+                                    - 60f // 一级 tab 高
                                     - 0.5f
                         )
                         defaultPageIndex(ctx.defaultIndex)
@@ -174,6 +178,17 @@ internal class MainPage : BasePager() {
                     event {
                         scroll {
                             ctx.scrollParams = it
+                        }
+                        pageIndexDidChanged { index ->
+                            // index 的类型是 JSONObject?
+                            // 内容是 "{"index": value}"
+                            (index as? JSONObject)?.let {
+                                val value = it.opt("index")
+                                value.toString().toIntOrNull()?.let { realIndex ->
+                                    println("MainPage index = $realIndex")
+                                    // index = 0
+                                }
+                            }
                         }
                     }
                     vfor({ ctx.tabDataList }) { item ->
@@ -190,18 +205,27 @@ internal class MainPage : BasePager() {
                                     SquareTree {
                                         attr {
                                             width(pagerData.pageViewWidth)
-                                            height(pagerData.pageViewHeight - pagerData.safeAreaInsets.top - pagerData.safeAreaInsets.bottom - 60)
+                                            height(
+                                                pagerData.pageViewHeight
+                                                        - pagerData.safeAreaInsets.top
+                                                        - pagerData.safeAreaInsets.bottom
+                                                        - 60f // 一级 tab 高
+                                            )
                                         }
                                     }
                                 }
 
                                 "项目", "订阅", "公众号" -> {
-                                    ArticleTree {
+                                    ArticleTree(item.tabTitle) {
                                         attr {
                                             width(pagerData.pageViewWidth)
-                                            height(pagerData.pageViewHeight - pagerData.safeAreaInsets.top - pagerData.safeAreaInsets.bottom - 60)
+                                            height(
+                                                pagerData.pageViewHeight
+                                                        - pagerData.safeAreaInsets.top
+                                                        - pagerData.safeAreaInsets.bottom
+                                                        - 60f // 一级 tab 高
+                                            )
                                         }
-                                        setModule(item.tabTitle)
                                     }
                                 }
 

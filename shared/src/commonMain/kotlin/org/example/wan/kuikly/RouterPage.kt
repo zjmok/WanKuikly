@@ -1,17 +1,29 @@
 package org.example.wan.kuikly
 
 import com.tencent.kuikly.core.annotations.Page
-import com.tencent.kuikly.core.base.*
+import com.tencent.kuikly.core.base.Color
+import com.tencent.kuikly.core.base.ColorStop
+import com.tencent.kuikly.core.base.ComposeAttr
+import com.tencent.kuikly.core.base.ComposeEvent
+import com.tencent.kuikly.core.base.ComposeView
+import com.tencent.kuikly.core.base.Direction
+import com.tencent.kuikly.core.base.ViewBuilder
+import com.tencent.kuikly.core.base.ViewContainer
+import com.tencent.kuikly.core.base.ViewRef
 import com.tencent.kuikly.core.directives.vif
 import com.tencent.kuikly.core.module.RouterModule
 import com.tencent.kuikly.core.module.SharedPreferencesModule
 import com.tencent.kuikly.core.nvi.serialization.json.JSONObject
+import com.tencent.kuikly.core.reactive.handler.observable
 import com.tencent.kuikly.core.utils.urlParams
-import com.tencent.kuikly.core.views.*
+import com.tencent.kuikly.core.views.Image
+import com.tencent.kuikly.core.views.Input
+import com.tencent.kuikly.core.views.InputView
+import com.tencent.kuikly.core.views.Text
+import com.tencent.kuikly.core.views.View
 import com.tencent.kuikly.core.views.compose.Button
-import com.tencent.kuikly.core.reactive.handler.*
 import org.example.wan.kuikly.base.BasePager
-import org.example.wan.kuikly.base.bridgeModule
+import org.example.wan.kuikly.utils.toast
 
 @Page("router", supportInLocal = true)
 internal class RouterPage : BasePager() {
@@ -126,7 +138,7 @@ internal class RouterPage : BasePager() {
                     event {
                         click {
                             if (ctx.inputText.isEmpty()) {
-                                ctx.bridgeModule.toast("请输入PageName")
+                                toast("请输入PageName")
                             } else {
                                 ctx.inputRef.view?.blur() // 失焦
                                 getPager().acquireModule<SharedPreferencesModule>(SharedPreferencesModule.MODULE_NAME)

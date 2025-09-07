@@ -8,7 +8,6 @@ import com.tencent.kuikly.core.base.ViewBuilder
 import com.tencent.kuikly.core.base.ViewContainer
 import com.tencent.kuikly.core.base.ViewRef
 import com.tencent.kuikly.core.directives.vforIndex
-import com.tencent.kuikly.core.module.NetworkModule
 import com.tencent.kuikly.core.nvi.serialization.json.JSONObject
 import com.tencent.kuikly.core.reactive.handler.observable
 import com.tencent.kuikly.core.reactive.handler.observableList
@@ -19,52 +18,50 @@ import com.tencent.kuikly.core.views.TabItem
 import com.tencent.kuikly.core.views.Tabs
 import com.tencent.kuikly.core.views.Text
 import com.tencent.kuikly.core.views.View
-import kotlinx.serialization.json.Json
 import org.example.wan.kuikly.data.ArticlesTreeItem
-import org.example.wan.kuikly.page.main.TabItemData
+import org.example.wan.kuikly.data.DataX
+import org.example.wan.kuikly.utils.json
+import org.example.wan.kuikly.utils.networkModule
+import org.example.wan.kuikly.utils.toast
+
+internal class TreeTabItem {
+    var moduleName by observable("")
+    var tabId by observable("")
+    var tabTitle by observable("")
+    var isLoad = false
+    var articleList by observableList<DataX>()
+}
 
 internal class ArticleTreeView : ComposeView<ArticleTreeViewAttr, ArticleTreeViewEvent>() {
 
     companion object {
-        const val BASE_URL = "https://www.wanandroid.com/"
+        const val BASE_URL = "https://www.wanandroid.com"
         const val HOME_LIST = "/article/list/{page}/json"
+
         const val PROJECT_TREE = "/project/tree/json"
+
+        // 项目列表数据, page >= 1
         const val PROJECT_LIST = "/project/list/{page}/json"
+
         const val SQUARE_LIST = "/user_article/list/{page}/json"
+
         const val WX_TREE = "/wxarticle/chapters/json"
+
+        // 在某个公众号中搜索历史文章, page >= 1
         const val WX_LIST = "/wxarticle/list/{id}/{page}/json"
     }
 
-    data class ArticleTree(
-        val `data`: List<Data>,
-        val errorCode: Int,
-        val errorMsg: String
-    )
+    // 模块名称, 首页 项目 ...
+    private var moduleName: String = ""
 
-    data class Data(
-        val articleList: List<Any>,
-        val author: String,
-        val children: List<Any>,
-        val courseId: Int,
-        val cover: String,
-        val desc: String,
-        val id: Int,
-        val lisense: String,
-        val lisenseLink: String,
-        val name: String,
-        val order: Int,
-        val parentChapterId: Int,
-        val type: Int,
-        val userControlSetTop: Boolean,
-        val visible: Int
-    )
-
-    private var module: String = ""
+    fun setModuleName(moduleName: String) {
+        this.moduleName = moduleName
+    }
 
     private var pageListRef: ViewRef<PageListView<*, *>>? = null
     private var scrollParams: ScrollParams? by observable(null)
 
-    private val tabDataList by observableList<TabItemData>()
+    private val tabList by observableList<TreeTabItem>()
 
     private var defaultIndex = 0
 
@@ -74,10 +71,6 @@ internal class ArticleTreeView : ComposeView<ArticleTreeViewAttr, ArticleTreeVie
 
     override fun createAttr(): ArticleTreeViewAttr {
         return ArticleTreeViewAttr()
-    }
-
-    fun setModule(module: String) {
-        this.module = module
     }
 
     override fun created() {
@@ -96,39 +89,106 @@ internal class ArticleTreeView : ComposeView<ArticleTreeViewAttr, ArticleTreeVie
 //        GlobalScope.launch(Dispatchers.Kuikly[this]) { }
 //        KuiklyContextScheduler.runOnKuiklyThread("") { }
 
-        val networkModule = acquireModule<NetworkModule>(NetworkModule.MODULE_NAME)
-        when (module) {
+        var url = ""
+        when (moduleName) {
             "项目" -> {
-                networkModule.requestGet(BASE_URL + PROJECT_TREE, JSONObject().apply {
-//                    put("", "")
-                }) { data, success, errorMsg, response ->
-//                    println(data)
-                    val tree = data.optJSONArray("data")
-                    val list = Json.decodeFromString<List<ArticlesTreeItem>>(tree.toString())
-                    tabDataList.clear()
-                    tabDataList.addAll(list.mapIndexed { i, it ->
-                        TabItemData().apply { id = "${it.id}"; tabTitle = it.nameDecoded }
-                    })
-//                    println(list)
+                url = BASE_URL + PROJECT_TREE
+            }
+
+            "订阅", "公众号" -> {
+                url = BASE_URL + WX_TREE
+            }
+        }
+        println("url = $url")
+        networkModule.requestGet(url, JSONObject().apply {
+//            put("", "")
+        }) { data, success, errorMsg, response ->
+            if (success.not()) {
+                toast(errorMsg)
+                return@requestGet
+            }
+            println(data)
+            setTabList(data)
+        }
+
+    }
+
+    private fun setTabList(data: JSONObject) {
+        val tree = data.optJSONArray("data")
+        val list = json.decodeFromString<List<ArticlesTreeItem>>(tree.toString())
+//        println(list)
+
+        tabList.clear()
+        // 遍历文章列表数据
+        for (it in list) {
+            val tabItem = TreeTabItem().apply {
+                tabId = "${it.id}"
+                tabTitle = it.nameDecoded
+//                articleList.addAll(mutableListOf())
+                isLoad = false
+            }
+            tabItem.moduleName = moduleName
+            tabList.add(tabItem)
+        }
+
+        // 加载 defaultIndex 的数据
+        if (list.isNotEmpty() && defaultIndex < tabList.size && tabList[defaultIndex].isLoad.not()) {
+            loadData(defaultIndex)
+        }
+    }
+
+    private fun loadData(index: Int) {
+        if (index >= tabList.size) {
+            return
+        }
+        println("加载数据 index=$index")
+
+        val id = tabList[index].tabId
+        var url = ""
+        val param = JSONObject()
+        var page = 1
+        when (moduleName) {
+            "项目" -> {
+                url = BASE_URL + PROJECT_LIST.run {
+                    this.replace("{page}", "$page")
+                }
+                param.apply {
+                    put("cid", id)
+                    put("page_size", "10")
                 }
             }
 
             "订阅", "公众号" -> {
-                networkModule.requestGet(BASE_URL + WX_TREE, JSONObject().apply {
-//                    put("", "")
-                }) { data, success, errorMsg, response ->
-//                    println(data)
-                    val tree = data.optJSONArray("data")
-                    val list = Json.decodeFromString<List<ArticlesTreeItem>>(tree.toString())
-                    tabDataList.clear()
-                    tabDataList.addAll(list.mapIndexed { i, it ->
-                        TabItemData().apply { id = "${it.id}"; tabTitle = it.nameDecoded }
-                    })
-//                    println(list)
+                url = BASE_URL + WX_LIST.run {
+                    this.replace("{id}", id)
+                        .replace("{page}", "$page")
+                }
+                param.apply {
+                    put("page_size", "10")
                 }
             }
         }
 
+        println("url = $url")
+        networkModule.requestGet(url, param) { data, success, errorMsg, response ->
+            if (success.not()) {
+                toast(errorMsg)
+                return@requestGet
+            }
+            println(data)
+            setArticleList(data, index)
+        }
+    }
+
+    private fun setArticleList(data: JSONObject, index: Int) {
+        val articles = data.optJSONObject("data")
+        val dates = articles?.optJSONArray("datas")
+
+        val list = json.decodeFromString<List<DataX>>(dates.toString())
+//        println("list.size = ${list.size} list.title = ${list.map { it.title }}")
+
+        tabList[index].articleList.addAll(list)
+        tabList[index].isLoad = true
     }
 
     override fun body(): ViewBuilder {
@@ -158,7 +218,7 @@ internal class ArticleTreeView : ComposeView<ArticleTreeViewAttr, ArticleTreeVie
                             scrollParams(it)
                         }
                     }
-                    vforIndex({ ctx.tabDataList }) { tabItem, index, count ->
+                    vforIndex({ ctx.tabList }) { tabItem, index, count ->
                         TabItem { state ->
                             attr {
 //                                width(80f)
@@ -195,6 +255,7 @@ internal class ArticleTreeView : ComposeView<ArticleTreeViewAttr, ArticleTreeVie
                         backgroundColor(Color.GRAY)
                     }
                 }
+                // List 必须设置宽高
                 PageList {
                     ref {
                         ctx.pageListRef = it
@@ -208,10 +269,10 @@ internal class ArticleTreeView : ComposeView<ArticleTreeViewAttr, ArticleTreeVie
                             pagerData.pageViewHeight
                                     - pagerData.safeAreaInsets.top
                                     - pagerData.safeAreaInsets.bottom
-                                    - 50
-                                    - 60
-                                    - 0.5f
-                                    - 0.5f
+                                    - 50f // 二级 tab 高
+                                    - 60f // 一级 tab 高
+                                    - 0.5f // 分割线高
+                                    - 0.5f // 分割线高
                         )
                         defaultPageIndex(ctx.defaultIndex)
                         offscreenPageLimit(1) //
@@ -220,18 +281,38 @@ internal class ArticleTreeView : ComposeView<ArticleTreeViewAttr, ArticleTreeVie
                         scroll {
                             ctx.scrollParams = it
                         }
+                        pageIndexDidChanged { index ->
+                            // index 的类型是 JSONObject?
+                            // 内容是 "{"index": value}"
+                            (index as? JSONObject)?.let {
+                                val value = it.opt("index")
+                                value.toString().toIntOrNull()?.let { realIndex ->
+                                    println("二级Tab index = $realIndex")
+                                    // 加载 index 数据，手动实现懒加载
+                                    if (realIndex < ctx.tabList.size && ctx.tabList[realIndex].isLoad.not()) {
+                                        ctx.loadData(realIndex)
+                                    }
+                                }
+                            }
+                        }
                     }
-                    vforIndex({ ctx.tabDataList }) { item, index, count ->
+                    vforIndex({ ctx.tabList }) { item, index, count ->
                         View {
                             attr {
 //                                backgroundColor(Color.YELLOW)
                                 allCenter()
                             }
-                            Text {
+//                            Text {
+//                                attr {
+//                                    text("${ctx.module}: tab = ${item.tabTitle}, id = ${item.id}")
+//                                    fontSize(20f)
+//                                    color(Color.BLUE)
+//                                }
+//                            }
+                            val tabItem = ctx.tabList[index]
+                            ArticleList(tabItem) {
                                 attr {
-                                    text("${ctx.module}: tab = ${item.tabTitle}, id = ${item.id}")
-                                    fontSize(20f)
-                                    color(Color.BLUE)
+
                                 }
                             }
                         }
@@ -251,6 +332,8 @@ internal class ArticleTreeViewEvent : ComposeEvent() {
 
 }
 
-internal fun ViewContainer<*, *>.ArticleTree(init: ArticleTreeView.() -> Unit) {
-    addChild(ArticleTreeView(), init)
+internal fun ViewContainer<*, *>.ArticleTree(moduleName: String, init: ArticleTreeView.() -> Unit) {
+    addChild(ArticleTreeView().apply {
+        setModuleName(moduleName)
+    }, init)
 }

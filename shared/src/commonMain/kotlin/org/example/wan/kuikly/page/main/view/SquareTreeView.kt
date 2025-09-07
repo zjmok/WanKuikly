@@ -8,7 +8,6 @@ import com.tencent.kuikly.core.base.ViewBuilder
 import com.tencent.kuikly.core.base.ViewContainer
 import com.tencent.kuikly.core.base.ViewRef
 import com.tencent.kuikly.core.directives.vforIndex
-import com.tencent.kuikly.core.module.NetworkModule
 import com.tencent.kuikly.core.reactive.handler.observable
 import com.tencent.kuikly.core.reactive.handler.observableList
 import com.tencent.kuikly.core.views.PageList
@@ -18,14 +17,14 @@ import com.tencent.kuikly.core.views.TabItem
 import com.tencent.kuikly.core.views.Tabs
 import com.tencent.kuikly.core.views.Text
 import com.tencent.kuikly.core.views.View
-import org.example.wan.kuikly.page.main.TabItemData
+import org.example.wan.kuikly.page.main.MainTabItem
 
 internal class SquareTreeView : ComposeView<SquareTreeViewAttr, SquareTreeViewEvent>() {
 
     private var pageListRef: ViewRef<PageListView<*, *>>? = null
     private var scrollParams: ScrollParams? by observable(null)
 
-    private val tabDataList by observableList<TabItemData>()
+    private val tabDataList by observableList<MainTabItem>()
 
     private var defaultIndex = 1
 
@@ -40,12 +39,9 @@ internal class SquareTreeView : ComposeView<SquareTreeViewAttr, SquareTreeViewEv
     override fun created() {
         super.created()
         tabDataList.clear()
-        tabDataList.add(TabItemData().apply { id = "id_0"; tabTitle = "搜索" })
-        tabDataList.add(TabItemData().apply { id = "id_1"; tabTitle = "广场" })
-        tabDataList.add(TabItemData().apply { id = "id_2"; tabTitle = "问答" })
-
-        val networkModule = getModule<NetworkModule>(NetworkModule.MODULE_NAME)
-
+        tabDataList.add(MainTabItem().apply { id = "id_0"; tabTitle = "搜索" })
+        tabDataList.add(MainTabItem().apply { id = "id_1"; tabTitle = "广场" })
+        tabDataList.add(MainTabItem().apply { id = "id_2"; tabTitle = "问答" })
     }
 
     override fun body(): ViewBuilder {
@@ -112,6 +108,7 @@ internal class SquareTreeView : ComposeView<SquareTreeViewAttr, SquareTreeViewEv
                         backgroundColor(Color.GRAY)
                     }
                 }
+                // List 必须设置宽高
                 PageList {
                     ref {
                         ctx.pageListRef = it
@@ -125,10 +122,10 @@ internal class SquareTreeView : ComposeView<SquareTreeViewAttr, SquareTreeViewEv
                             pagerData.pageViewHeight
                                     - pagerData.safeAreaInsets.top
                                     - pagerData.safeAreaInsets.bottom
-                                    - 50
-                                    - 60
-                                    - 0.5f
-                                    - 0.5f
+                                    - 50f // 二级 tab 高
+                                    - 60f // 一级 tab 高
+                                    - 0.5f // 分割线高
+                                    - 0.5f // 分割线高
                         )
                         defaultPageIndex(ctx.defaultIndex)
                         offscreenPageLimit(1) //

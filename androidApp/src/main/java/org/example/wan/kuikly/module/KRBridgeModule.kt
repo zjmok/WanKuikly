@@ -4,11 +4,9 @@ import android.content.ClipData
 import android.content.ClipboardManager
 import android.content.Context
 import android.util.Log
-import android.widget.Toast
+import com.hjq.toast.Toaster
 import com.tencent.kuikly.core.render.android.export.KuiklyRenderBaseModule
 import com.tencent.kuikly.core.render.android.export.KuiklyRenderCallback
-import org.example.wan.kuikly.KRApplication
-import org.example.wan.kuikly.KuiklyRenderActivity
 import org.json.JSONArray
 import org.json.JSONObject
 import java.text.SimpleDateFormat
@@ -99,11 +97,8 @@ class KRBridgeModule : KuiklyRenderBaseModule() {
             return
         }
         val paramJSON = JSONObject(params)
-        Toast.makeText(
-            KRApplication.application,
-            paramJSON.optString("content"),
-            Toast.LENGTH_SHORT
-        ).show()
+        val message = paramJSON.optString("content")
+        Toaster.show(message)
     }
 
     private fun copyToPasteboard(params: String?) {

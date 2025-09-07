@@ -1,40 +1,35 @@
-package org.example.wan.kuikly.page.main.view
+package org.example.wan.kuikly.page.main
 
+import com.tencent.kuikly.core.annotations.Page
 import com.tencent.kuikly.core.base.Color
-import com.tencent.kuikly.core.base.ComposeAttr
-import com.tencent.kuikly.core.base.ComposeEvent
-import com.tencent.kuikly.core.base.ComposeView
 import com.tencent.kuikly.core.base.ViewBuilder
-import com.tencent.kuikly.core.base.ViewContainer
 import com.tencent.kuikly.core.base.attr.ImageUri
-import com.tencent.kuikly.core.module.RouterModule
 import com.tencent.kuikly.core.views.Image
 import com.tencent.kuikly.core.views.List
 import com.tencent.kuikly.core.views.Text
 import com.tencent.kuikly.core.views.View
 import com.tencent.kuikly.core.views.layout.Column
 import org.example.wan.kuikly.RouterPage.Companion.LOGO
+import org.example.wan.kuikly.base.BasePager
 import org.example.wan.kuikly.utils.routerModule
 import org.example.wan.kuikly.utils.toast
 
-internal class PersonView : ComposeView<PersonViewAttr, PersonViewEvent>() {
-
-    override fun createEvent(): PersonViewEvent {
-        return PersonViewEvent()
-    }
-
-    override fun createAttr(): PersonViewAttr {
-        return PersonViewAttr()
-    }
+@Page("settings")
+internal class SettingsPage : BasePager() {
 
     override fun body(): ViewBuilder {
         val ctx = this
         return {
+            // View 不设置宽高则大小为包裹内容
             View {
                 attr {
                     justifyContentFlexStart() // 主轴 Start
                     alignItemsStretch() // 交叉轴 Stretch 伸展
-//                    backgroundColor(Color.YELLOW)
+//                    backgroundColor(Color.BLUE)
+//                    size(
+//                        pagerData.pageViewWidth,
+//                        pagerData.pageViewHeight
+//                    )
                 }
                 // List 必须设置宽高
                 List {
@@ -43,12 +38,8 @@ internal class PersonView : ComposeView<PersonViewAttr, PersonViewEvent>() {
                         size(
                             pagerData.pageViewWidth,
                             pagerData.pageViewHeight
-                                    - pagerData.safeAreaInsets.top
-                                    - pagerData.safeAreaInsets.bottom
-//                                - 50 // 二级 tab 高
-                                    - 60f // 一级 tab 高
-                                    - 0.5f // 分割线高
-                                    - 0.5f // 分割线高
+//                                    - pagerData.safeAreaInsets.top
+//                                    - pagerData.safeAreaInsets.bottom
                         )
                     }
                     View {
@@ -57,13 +48,20 @@ internal class PersonView : ComposeView<PersonViewAttr, PersonViewEvent>() {
                             alignItemsStretch()
                             flexDirectionColumn()
                         }
-                        // item header
+                        // 状态栏 填充
+                        View {
+                            attr {
+                                height(pagerData.safeAreaInsets.top)
+                                backgroundColor(Color.WHITE)
+                            }
+                        }
+                        // item
                         View {
                             attr {
                                 alignItemsCenter()
                                 flexDirectionRow()
                                 backgroundColor(Color.WHITE)
-                                minHeight(200f)
+                                minHeight(60f)
                                 padding(left = 10f, right = 10f)
                             }
                             event {
@@ -73,27 +71,16 @@ internal class PersonView : ComposeView<PersonViewAttr, PersonViewEvent>() {
                             }
                             Image {
                                 attr {
-                                    size(60f, 60f)
-                                    src(LOGO)
+                                    size(32f, 32f)
+                                    src(ImageUri.commonAssets("icon_home_selected.png"))
                                 }
                             }
-                            Column {
+                            Text {
                                 attr {
-                                    flex(1f)
                                     margin(left = 10f, right = 10f)
-                                }
-                                Text {
-                                    attr {
-                                        text("昵称昵称昵称")
-                                        fontSize(20f)
-                                    }
-                                }
-                                Text {
-                                    attr {
-                                        marginTop(8f)
-                                        text("ididid")
-                                        fontSize(18f)
-                                    }
+                                    flex(1f)
+                                    text("item")
+                                    fontSize(18f)
                                 }
                             }
                             Image {
@@ -101,14 +88,6 @@ internal class PersonView : ComposeView<PersonViewAttr, PersonViewEvent>() {
                                     size(10f, 20f)
                                     src(ImageUri.commonAssets("icon_arrow_right.png"))
                                 }
-                            }
-                        }
-                        // 分割块
-                        View {
-                            attr {
-                                height(10f)
-                                width(pagerData.pageViewWidth)
-                                backgroundColor(Color.GRAY)
                             }
                         }
                         // item
@@ -294,7 +273,7 @@ internal class PersonView : ComposeView<PersonViewAttr, PersonViewEvent>() {
                             }
                             event {
                                 click {
-                                    routerModule.openPage("settings")
+                                    toast("about")
                                 }
                             }
                             Image {
@@ -307,7 +286,7 @@ internal class PersonView : ComposeView<PersonViewAttr, PersonViewEvent>() {
                                 attr {
                                     margin(left = 10f, right = 10f)
                                     flex(1f)
-                                    text("设置")
+                                    text("关于")
                                     fontSize(18f)
                                 }
                             }
@@ -324,16 +303,4 @@ internal class PersonView : ComposeView<PersonViewAttr, PersonViewEvent>() {
         }
     }
 
-}
-
-internal class PersonViewAttr : ComposeAttr() {
-
-}
-
-internal class PersonViewEvent : ComposeEvent() {
-
-}
-
-internal fun ViewContainer<*, *>.Person(init: PersonView.() -> Unit) {
-    addChild(PersonView(), init)
 }

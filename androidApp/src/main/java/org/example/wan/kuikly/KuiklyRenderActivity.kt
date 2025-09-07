@@ -8,7 +8,6 @@ import android.os.Bundle
 import android.view.View
 import android.view.ViewGroup
 import android.view.WindowManager
-import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import com.tencent.kuikly.core.render.android.IKuiklyRenderExport
 import com.tencent.kuikly.core.render.android.adapter.KuiklyRenderAdapterManager
@@ -57,19 +56,8 @@ class KuiklyRenderActivity : AppCompatActivity(), KuiklyRenderViewBaseDelegatorD
             val eventName = intent.getKuiklyEventName()
             // 数据
             val data = intent.getKuiklyEventParams()
-
-            when (eventName) {
-                // toast
-                "toast" -> {
-                    val message = try {
-                        data.getString("message")
-                    } catch (e: Exception) {
-                        ""
-                    }
-                    // Android 执行
-                    Toast.makeText(this@KuiklyRenderActivity, message, Toast.LENGTH_SHORT).show()
-                }
-            }
+            // 处理通知
+            // ...
         }
     }
 
