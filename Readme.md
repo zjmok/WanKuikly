@@ -1,4 +1,14 @@
 
+效果图
+
+<div style="display: flex; justify-content: space-between;">
+    <img src="picture/Screenshot_android_home.jpg" width="32%">
+    <img src="picture/Screenshot_android_project.jpg" width="32%">
+    <img src="picture/Screenshot_android_person.jpg" width="32%">
+</div>
+
+---
+
 # WanKuikly
 
 当前使用版本
@@ -7,12 +17,51 @@
 - Kotlin 2.0.21
 - Kotlin OHOS 2.0.21-KBA-004
 
+当前只在 Android 平台正常运行，未调试其它平台
+
 ---
 
+在插件模板创建项目之后，
 使用到的库
 
+common
 - `kotlinx-serialization`
 - `kuiklyx-coroutines` 目前还有问题
+
+android
+- `Toaster`
+
+---
+
+todo，待完成
+
+- WebPager
+- 搜索页面
+- 下拉上拉处理
+- 登录，存储
+- 懒加载优化
+- shared模块的协程问题
+- 解决硬编码
+- 
+
+---
+
+存在的问题
+
+- common 协程未成功接入
+- html 标签的显示
+- 多个容器高度设置 0.5f，显示不一致，多个分割线大小不一致，在模拟器上 1f 也大小不一致
+- android 模块，kuikly 源码在 ide 加载不出来，爆红，但可以正常使用运行
+- Android API 未适配到最新版，最高支持 34
+- 
+
+---
+
+写 Bug 心得
+
+- ComposeView，插件创建的类是通过 addChild 添加的，在构建对象时传递参数，view创建时会调用一次。可以先传一个引用，之后更新这个引用的数据
+
+---
 
 ## Android
 

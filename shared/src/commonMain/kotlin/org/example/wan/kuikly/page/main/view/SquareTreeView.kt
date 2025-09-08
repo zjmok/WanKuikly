@@ -8,6 +8,7 @@ import com.tencent.kuikly.core.base.ViewBuilder
 import com.tencent.kuikly.core.base.ViewContainer
 import com.tencent.kuikly.core.base.ViewRef
 import com.tencent.kuikly.core.directives.vforIndex
+import com.tencent.kuikly.core.nvi.serialization.json.JSONObject
 import com.tencent.kuikly.core.reactive.handler.observable
 import com.tencent.kuikly.core.reactive.handler.observableList
 import com.tencent.kuikly.core.views.PageList
@@ -17,14 +18,21 @@ import com.tencent.kuikly.core.views.TabItem
 import com.tencent.kuikly.core.views.Tabs
 import com.tencent.kuikly.core.views.Text
 import com.tencent.kuikly.core.views.View
-import org.example.wan.kuikly.page.main.MainTabItem
+import org.example.wan.kuikly.data.DataX
+import org.example.wan.kuikly.data.remote.WanAPI.BASE_URL
+import org.example.wan.kuikly.data.remote.WanAPI.QA_LIST
+import org.example.wan.kuikly.data.remote.WanAPI.SQUARE_LIST
+import org.example.wan.kuikly.utils.Fore
+import org.example.wan.kuikly.utils.fromJson
+import org.example.wan.kuikly.utils.networkModule
+import org.example.wan.kuikly.utils.toast
 
 internal class SquareTreeView : ComposeView<SquareTreeViewAttr, SquareTreeViewEvent>() {
 
     private var pageListRef: ViewRef<PageListView<*, *>>? = null
     private var scrollParams: ScrollParams? by observable(null)
 
-    private val tabDataList by observableList<MainTabItem>()
+    private val tabList by observableList<TreeTabItem>()
 
     private var defaultIndex = 1
 
@@ -38,10 +46,83 @@ internal class SquareTreeView : ComposeView<SquareTreeViewAttr, SquareTreeViewEv
 
     override fun created() {
         super.created()
-        tabDataList.clear()
-        tabDataList.add(MainTabItem().apply { id = "id_0"; tabTitle = "搜索" })
-        tabDataList.add(MainTabItem().apply { id = "id_1"; tabTitle = "广场" })
-        tabDataList.add(MainTabItem().apply { id = "id_2"; tabTitle = "问答" })
+
+        setSquareTabList()
+    }
+
+    private fun setSquareTabList() {
+        tabList.clear()
+        listOf("搜索", "广场", "问答").forEach {
+            val tabItem = TreeTabItem().apply {
+                moduleName = "广场"
+                tabTitle = it
+                isLoad = false
+            }
+            tabList.add(tabItem)
+        }
+
+        // 加载 defaultIndex 的数据
+        if (defaultIndex < tabList.size && tabList[defaultIndex].isLoad.not()) {
+            loadData(defaultIndex)
+        }
+    }
+
+    private fun loadData(index: Int) {
+        if (index >= tabList.size) {
+            return
+        }
+        println("加载数据 index=$index")
+
+        var url = ""
+        val param = JSONObject()
+
+        when (tabList[index].tabTitle) {
+            "搜索" -> {
+                return
+            }
+
+            "广场" -> {
+                var page = 0
+                url = BASE_URL + SQUARE_LIST.run {
+                    this.replace("{page}", "$page")
+                }
+                param.apply {
+                    put("page_size", "10")
+                }
+            }
+
+            "问答" -> {
+                var page = 0
+                url = BASE_URL + QA_LIST.run {
+                    this.replace("{page}", "$page")
+                }
+                param.apply {
+                    // 接口 bug, 传了 page_size 返回列表没有置顶数据, 不传是正常的
+//                    put("page_size", "10")
+                }
+            }
+        }
+
+        println("url = $url")
+        networkModule.requestGet(url, param) { data, success, errorMsg, response ->
+            if (success.not()) {
+                toast(errorMsg)
+                return@requestGet
+            }
+
+//            println(data)
+            setArticleList(data, index)
+        }
+    }
+
+    private fun setArticleList(data: JSONObject, index: Int) {
+        val articles = data.optJSONObject("data")
+        val dates = articles?.optJSONArray("datas")
+
+        val list = fromJson<List<DataX>>(dates.toString()) ?: return
+
+        tabList[index].articleList.addAll(list)
+        tabList[index].isLoad = true
     }
 
     override fun body(): ViewBuilder {
@@ -65,7 +146,7 @@ internal class SquareTreeView : ComposeView<SquareTreeViewAttr, SquareTreeViewEv
                                     absolutePosition(left = 15f, right = 15f, bottom = 0f)
                                     height(2f)
                                     borderRadius(2f)
-                                    backgroundColor(Color.GREEN)
+                                    backgroundColor(Color.Fore)
                                 }
                             }
                         }
@@ -73,7 +154,7 @@ internal class SquareTreeView : ComposeView<SquareTreeViewAttr, SquareTreeViewEv
                             scrollParams(it)
                         }
                     }
-                    vforIndex({ ctx.tabDataList }) { tabItem, index, count ->
+                    vforIndex({ ctx.tabList }) { tabItem, index, count ->
                         TabItem { state ->
                             attr {
                                 width(80f)
@@ -134,18 +215,47 @@ internal class SquareTreeView : ComposeView<SquareTreeViewAttr, SquareTreeViewEv
                         scroll {
                             ctx.scrollParams = it
                         }
+                        pageIndexDidChanged { index ->
+                            // index 的类型是 JSONObject?
+                            // 内容是 "{"index": value}"
+                            (index as? JSONObject)?.let {
+                                val value = it.opt("index")
+                                value.toString().toIntOrNull()?.let { realIndex ->
+                                    println("二级Tab index = $realIndex")
+                                    // 加载 index 数据，手动实现懒加载
+                                    if (realIndex < ctx.tabList.size && ctx.tabList[realIndex].isLoad.not()) {
+                                        ctx.loadData(realIndex)
+                                    }
+                                }
+                            }
+                        }
                     }
-                    vforIndex({ ctx.tabDataList }) { item, index, count ->
+                    vforIndex({ ctx.tabList }) { item, index, count ->
                         View {
                             attr {
 //                                backgroundColor(Color.YELLOW)
                                 allCenter()
                             }
-                            Text {
+//                            Text {
+//                                attr {
+//                                    text("广场: tab = ${item.tabTitle}, index = $index")
+//                                    fontSize(20f)
+//                                    color(Color.BLUE)
+//                                }
+//                            }
+                            val tabItem = ctx.tabList[index]
+                            ArticleList(
+                                tabItem = tabItem,
+                                height = ctx.pagerData.pageViewHeight
+                                        - ctx.pagerData.safeAreaInsets.top
+                                        - ctx.pagerData.safeAreaInsets.bottom
+                                        - 50f // 二级 tab 高
+                                        - 60f // 一级 tab 高
+                                        - 0.5f // 分割线高
+                                        - 0.5f // 分割线高
+                            ) {
                                 attr {
-                                    text("广场: tab = ${item.tabTitle}, index = $index")
-                                    fontSize(20f)
-                                    color(Color.BLUE)
+
                                 }
                             }
                         }

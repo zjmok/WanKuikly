@@ -1,5 +1,7 @@
 package org.example.wan.kuikly.page.main.view
 
+import com.tencent.kuikly.core.base.Border
+import com.tencent.kuikly.core.base.BorderStyle
 import com.tencent.kuikly.core.base.Color
 import com.tencent.kuikly.core.base.ComposeAttr
 import com.tencent.kuikly.core.base.ComposeEvent
@@ -7,13 +9,14 @@ import com.tencent.kuikly.core.base.ComposeView
 import com.tencent.kuikly.core.base.ViewBuilder
 import com.tencent.kuikly.core.base.ViewContainer
 import com.tencent.kuikly.core.base.attr.ImageUri
-import com.tencent.kuikly.core.module.RouterModule
 import com.tencent.kuikly.core.views.Image
 import com.tencent.kuikly.core.views.List
 import com.tencent.kuikly.core.views.Text
 import com.tencent.kuikly.core.views.View
 import com.tencent.kuikly.core.views.layout.Column
 import org.example.wan.kuikly.RouterPage.Companion.LOGO
+import org.example.wan.kuikly.utils.Background
+import org.example.wan.kuikly.utils.Fore
 import org.example.wan.kuikly.utils.routerModule
 import org.example.wan.kuikly.utils.toast
 
@@ -39,7 +42,7 @@ internal class PersonView : ComposeView<PersonViewAttr, PersonViewEvent>() {
                 // List 必须设置宽高
                 List {
                     attr {
-                        backgroundColor(Color.GRAY)
+                        backgroundColor(Color.Background)
                         size(
                             pagerData.pageViewWidth,
                             pagerData.pageViewHeight
@@ -73,7 +76,10 @@ internal class PersonView : ComposeView<PersonViewAttr, PersonViewEvent>() {
                             }
                             Image {
                                 attr {
-                                    size(60f, 60f)
+                                    size(80f, 80f)
+                                    borderRadius(40f)
+                                    border(Border(1f, BorderStyle.DASHED, Color.Fore))
+                                    resizeCover()
                                     src(LOGO)
                                 }
                             }
@@ -108,7 +114,7 @@ internal class PersonView : ComposeView<PersonViewAttr, PersonViewEvent>() {
                             attr {
                                 height(10f)
                                 width(pagerData.pageViewWidth)
-                                backgroundColor(Color.GRAY)
+//                                backgroundColor(Color.GRAY)
                             }
                         }
                         // item
@@ -127,7 +133,7 @@ internal class PersonView : ComposeView<PersonViewAttr, PersonViewEvent>() {
                             }
                             Image {
                                 attr {
-                                    size(32f, 32f)
+                                    size(20f, 20f)
                                     src(ImageUri.commonAssets("icon_home_selected.png"))
                                 }
                             }
@@ -151,7 +157,7 @@ internal class PersonView : ComposeView<PersonViewAttr, PersonViewEvent>() {
                             attr {
                                 height(10f)
                                 width(pagerData.pageViewWidth)
-                                backgroundColor(Color.GRAY)
+//                                backgroundColor(Color.GRAY)
                             }
                         }
                         // item
@@ -170,7 +176,7 @@ internal class PersonView : ComposeView<PersonViewAttr, PersonViewEvent>() {
                             }
                             Image {
                                 attr {
-                                    size(32f, 32f)
+                                    size(20f, 20f)
                                     src(ImageUri.commonAssets("icon_home_selected.png"))
                                 }
                             }
@@ -192,9 +198,9 @@ internal class PersonView : ComposeView<PersonViewAttr, PersonViewEvent>() {
                         // 分割线
                         View {
                             attr {
-                                height(0.5f)
+                                height(1f)
                                 width(pagerData.pageViewWidth)
-                                backgroundColor(Color.GRAY)
+//                                backgroundColor(Color.GRAY)
                             }
                         }
                         // item
@@ -213,7 +219,7 @@ internal class PersonView : ComposeView<PersonViewAttr, PersonViewEvent>() {
                             }
                             Image {
                                 attr {
-                                    size(32f, 32f)
+                                    size(20f, 20f)
                                     src(ImageUri.commonAssets("icon_home_selected.png"))
                                 }
                             }
@@ -235,12 +241,12 @@ internal class PersonView : ComposeView<PersonViewAttr, PersonViewEvent>() {
                         // 分割线
                         View {
                             attr {
-                                height(0.5f)
+                                height(1f)
                                 width(pagerData.pageViewWidth)
-                                backgroundColor(Color.GRAY)
+//                                backgroundColor(Color.GRAY)
                             }
                         }
-                        // item
+                        // item test
                         View {
                             attr {
                                 alignItemsCenter()
@@ -251,12 +257,12 @@ internal class PersonView : ComposeView<PersonViewAttr, PersonViewEvent>() {
                             }
                             event {
                                 click {
-                                    toast("click")
+                                    routerModule.openPage("test")
                                 }
                             }
                             Image {
                                 attr {
-                                    size(32f, 32f)
+                                    size(20f, 20f)
                                     src(ImageUri.commonAssets("icon_home_selected.png"))
                                 }
                             }
@@ -264,7 +270,7 @@ internal class PersonView : ComposeView<PersonViewAttr, PersonViewEvent>() {
                                 attr {
                                     margin(left = 10f, right = 10f)
                                     flex(1f)
-                                    text("item")
+                                    text("test")
                                     fontSize(18f)
                                 }
                             }
@@ -280,7 +286,7 @@ internal class PersonView : ComposeView<PersonViewAttr, PersonViewEvent>() {
                             attr {
                                 height(10f)
                                 width(pagerData.pageViewWidth)
-                                backgroundColor(Color.GRAY)
+//                                backgroundColor(Color.GRAY)
                             }
                         }
                         // item 设置
@@ -299,7 +305,7 @@ internal class PersonView : ComposeView<PersonViewAttr, PersonViewEvent>() {
                             }
                             Image {
                                 attr {
-                                    size(32f, 32f)
+                                    size(20f, 20f)
                                     src(ImageUri.commonAssets("icon_home_selected.png"))
                                 }
                             }

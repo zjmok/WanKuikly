@@ -24,6 +24,8 @@ import org.example.wan.kuikly.page.main.view.ArticleTree
 import org.example.wan.kuikly.page.main.view.HomeList
 import org.example.wan.kuikly.page.main.view.Person
 import org.example.wan.kuikly.page.main.view.SquareTree
+import org.example.wan.kuikly.utils.Back
+import org.example.wan.kuikly.utils.Fore
 
 internal class MainTabItem {
     var id by observable("")
@@ -40,17 +42,17 @@ internal class MainPage : BasePager() {
 
     private val tabDataList by observableList<MainTabItem>()
 
-    private var defaultIndex = 1
+    private var defaultIndex = 0
 
     override fun created() {
         super.created()
         val list =
             listOf(
-                mapOf("title" to "推荐", "img" to "icon_home"),
+                mapOf("title" to "首页", "img" to "icon_home"),
                 mapOf("title" to "项目", "img" to "icon_project"),
                 mapOf("title" to "广场", "img" to "icon_square"),
                 mapOf("title" to "订阅", "img" to "icon_subscribe"),
-                mapOf("title" to "我的", "img" to "icon_person"),
+                mapOf("title" to "我", "img" to "icon_person"),
 //                mapOf("title" to "体系", "img" to "tree"),
 //                mapOf("title" to "导航", "img" to "navi"),
 //                mapOf("title" to "收藏", "img" to "collect"),
@@ -79,8 +81,8 @@ internal class MainPage : BasePager() {
             View {
                 attr {
 //                    flexDirectionColumn()
-                    marginTop(pagerData.statusBarHeight)
                     flexDirection(FlexDirection.COLUMN_REVERSE)
+                    marginTop(pagerData.statusBarHeight)
                 }
                 Tabs {
                     attr {
@@ -94,7 +96,7 @@ internal class MainPage : BasePager() {
                                     absolutePosition(left = 15f, right = 15f, bottom = 5f)
                                     height(6f)
                                     borderRadius(2f)
-//                                    backgroundColor(Color.YELLOW)
+//                                    backgroundColor(Color.Fore)
                                 }
                             }
                         }
@@ -125,16 +127,16 @@ internal class MainPage : BasePager() {
                                         // 使用 assets 资源
                                         // assets-resource.md
                                         // https://kuikly.tds.qq.com/DevGuide/assets-resource.html
-                                        val imageUri = ImageUri.commonAssets("${tabItem.tabImg}.png")
-                                        val imageSelectedUri = ImageUri.commonAssets("${tabItem.tabImg}_selected.png")
-                                        src(if (state.selected) imageSelectedUri else imageUri)
+                                        val imageUri0 = ImageUri.commonAssets("${tabItem.tabImg}.png")
+                                        val imageUri1 = ImageUri.commonAssets("${tabItem.tabImg}_selected.png")
+                                        src(if (state.selected) imageUri1 else imageUri0)
                                     }
                                 }
                                 Text {
                                     attr {
                                         text(tabItem.tabTitle)
                                         fontSize(16f)
-                                        color(if (state.selected) Color.RED else Color.GRAY)
+                                        color(if (state.selected) Color.Fore else Color.Back)
                                     }
                                 }
                             }
@@ -229,7 +231,7 @@ internal class MainPage : BasePager() {
                                     }
                                 }
 
-                                "我的", "个人" -> {
+                                "个人", "我" -> {
                                     Person { }
                                 }
                             }

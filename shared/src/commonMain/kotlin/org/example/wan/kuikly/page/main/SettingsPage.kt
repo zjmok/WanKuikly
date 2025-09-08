@@ -8,10 +8,10 @@ import com.tencent.kuikly.core.views.Image
 import com.tencent.kuikly.core.views.List
 import com.tencent.kuikly.core.views.Text
 import com.tencent.kuikly.core.views.View
-import com.tencent.kuikly.core.views.layout.Column
-import org.example.wan.kuikly.RouterPage.Companion.LOGO
 import org.example.wan.kuikly.base.BasePager
-import org.example.wan.kuikly.utils.routerModule
+import org.example.wan.kuikly.utils.Background
+import org.example.wan.kuikly.utils.PrimaryText
+import org.example.wan.kuikly.utils.SecondaryText
 import org.example.wan.kuikly.utils.toast
 
 @Page("settings")
@@ -34,7 +34,7 @@ internal class SettingsPage : BasePager() {
                 // List 必须设置宽高
                 List {
                     attr {
-                        backgroundColor(Color.GRAY)
+                        backgroundColor(Color.Background)
                         size(
                             pagerData.pageViewWidth,
                             pagerData.pageViewHeight
@@ -55,6 +55,12 @@ internal class SettingsPage : BasePager() {
                                 backgroundColor(Color.WHITE)
                             }
                         }
+                        // navBar
+//                        NavBar {
+//                            attr {
+//                                title = "设置"
+//                            }
+//                        }
                         // item
                         View {
                             attr {
@@ -71,7 +77,7 @@ internal class SettingsPage : BasePager() {
                             }
                             Image {
                                 attr {
-                                    size(32f, 32f)
+                                    size(20f, 20f)
                                     src(ImageUri.commonAssets("icon_home_selected.png"))
                                 }
                             }
@@ -90,6 +96,14 @@ internal class SettingsPage : BasePager() {
                                 }
                             }
                         }
+                        // 分割线
+                        View {
+                            attr {
+                                height(1f)
+                                width(pagerData.pageViewWidth)
+//                                backgroundColor(Color.GRAY)
+                            }
+                        }
                         // item
                         View {
                             attr {
@@ -106,7 +120,7 @@ internal class SettingsPage : BasePager() {
                             }
                             Image {
                                 attr {
-                                    size(32f, 32f)
+                                    size(20f, 20f)
                                     src(ImageUri.commonAssets("icon_home_selected.png"))
                                 }
                             }
@@ -130,7 +144,7 @@ internal class SettingsPage : BasePager() {
                             attr {
                                 height(10f)
                                 width(pagerData.pageViewWidth)
-                                backgroundColor(Color.GRAY)
+//                                backgroundColor(Color.GRAY)
                             }
                         }
                         // item
@@ -149,7 +163,7 @@ internal class SettingsPage : BasePager() {
                             }
                             Image {
                                 attr {
-                                    size(32f, 32f)
+                                    size(20f, 20f)
                                     src(ImageUri.commonAssets("icon_home_selected.png"))
                                 }
                             }
@@ -171,9 +185,9 @@ internal class SettingsPage : BasePager() {
                         // 分割线
                         View {
                             attr {
-                                height(0.5f)
+                                height(1f)
                                 width(pagerData.pageViewWidth)
-                                backgroundColor(Color.GRAY)
+//                                backgroundColor(Color.GRAY)
                             }
                         }
                         // item
@@ -192,7 +206,7 @@ internal class SettingsPage : BasePager() {
                             }
                             Image {
                                 attr {
-                                    size(32f, 32f)
+                                    size(20f, 20f)
                                     src(ImageUri.commonAssets("icon_home_selected.png"))
                                 }
                             }
@@ -214,9 +228,9 @@ internal class SettingsPage : BasePager() {
                         // 分割线
                         View {
                             attr {
-                                height(0.5f)
+                                height(1f)
                                 width(pagerData.pageViewWidth)
-                                backgroundColor(Color.GRAY)
+//                                backgroundColor(Color.GRAY)
                             }
                         }
                         // item
@@ -235,7 +249,7 @@ internal class SettingsPage : BasePager() {
                             }
                             Image {
                                 attr {
-                                    size(32f, 32f)
+                                    size(20f, 20f)
                                     src(ImageUri.commonAssets("icon_home_selected.png"))
                                 }
                             }
@@ -259,10 +273,10 @@ internal class SettingsPage : BasePager() {
                             attr {
                                 height(10f)
                                 width(pagerData.pageViewWidth)
-                                backgroundColor(Color.GRAY)
+//                                backgroundColor(Color.GRAY)
                             }
                         }
-                        // item 设置
+                        // item 关于
                         View {
                             attr {
                                 alignItemsCenter()
@@ -278,7 +292,7 @@ internal class SettingsPage : BasePager() {
                             }
                             Image {
                                 attr {
-                                    size(32f, 32f)
+                                    size(20f, 20f)
                                     src(ImageUri.commonAssets("icon_home_selected.png"))
                                 }
                             }
@@ -287,7 +301,16 @@ internal class SettingsPage : BasePager() {
                                     margin(left = 10f, right = 10f)
                                     flex(1f)
                                     text("关于")
+                                    color(Color.PrimaryText)
                                     fontSize(18f)
+                                }
+                            }
+                            Text {
+                                attr {
+                                    text("v1.0.0")
+                                    color(Color.SecondaryText)
+                                    fontSize(16f)
+                                    margin(right = 10f)
                                 }
                             }
                             Image {
