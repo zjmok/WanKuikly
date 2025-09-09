@@ -1,4 +1,4 @@
-package org.example.wan.kuikly.page.main.view
+package org.example.wan.kuikly.page.common
 
 import com.tencent.kuikly.core.base.BoxShadow
 import com.tencent.kuikly.core.base.Color

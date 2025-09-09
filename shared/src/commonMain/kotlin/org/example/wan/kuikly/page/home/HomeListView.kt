@@ -1,4 +1,4 @@
-package org.example.wan.kuikly.page.main.view
+package org.example.wan.kuikly.page.home
 
 import com.tencent.kuikly.core.base.ComposeAttr
 import com.tencent.kuikly.core.base.ComposeEvent
@@ -7,12 +7,13 @@ import com.tencent.kuikly.core.base.ViewBuilder
 import com.tencent.kuikly.core.base.ViewContainer
 import com.tencent.kuikly.core.nvi.serialization.json.JSONObject
 import com.tencent.kuikly.core.reactive.handler.observable
-import com.tencent.kuikly.core.reactive.handler.observableList
 import org.example.wan.kuikly.data.BannerItem
 import org.example.wan.kuikly.data.DataX
 import org.example.wan.kuikly.data.remote.WanAPI.BANNER_LIST
 import org.example.wan.kuikly.data.remote.WanAPI.BASE_URL
 import org.example.wan.kuikly.data.remote.WanAPI.HOME_LIST
+import org.example.wan.kuikly.page.common.ArticleList
+import org.example.wan.kuikly.page.common.TreeTabItem
 import org.example.wan.kuikly.utils.fromJson
 import org.example.wan.kuikly.utils.networkModule
 import org.example.wan.kuikly.utils.toast

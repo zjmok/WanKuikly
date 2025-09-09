@@ -46,7 +46,7 @@ class KRImageAdapter(val context: Context) : IKRImageAdapter {
         } else {
             imageLoadOption.src
         }
-        Log.i("Glide","url = $src")
+//        Log.i("Glide", "url = $src")
         val requestBuilder = if (src.endsWith(".gif")) {
             Glide.with(KRApplication.application)
                 .asGif()

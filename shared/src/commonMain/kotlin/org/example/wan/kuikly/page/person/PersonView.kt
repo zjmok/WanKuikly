@@ -1,4 +1,4 @@
-package org.example.wan.kuikly.page.main.view
+package org.example.wan.kuikly.page.person
 
 import com.tencent.kuikly.core.base.Border
 import com.tencent.kuikly.core.base.BorderStyle
@@ -203,49 +203,6 @@ internal class PersonView : ComposeView<PersonViewAttr, PersonViewEvent>() {
 //                                backgroundColor(Color.GRAY)
                             }
                         }
-                        // item
-                        View {
-                            attr {
-                                alignItemsCenter()
-                                flexDirectionRow()
-                                backgroundColor(Color.WHITE)
-                                minHeight(60f)
-                                padding(left = 10f, right = 10f)
-                            }
-                            event {
-                                click {
-                                    toast("click")
-                                }
-                            }
-                            Image {
-                                attr {
-                                    size(20f, 20f)
-                                    src(ImageUri.commonAssets("icon_home_selected.png"))
-                                }
-                            }
-                            Text {
-                                attr {
-                                    margin(left = 10f, right = 10f)
-                                    flex(1f)
-                                    text("item")
-                                    fontSize(18f)
-                                }
-                            }
-                            Image {
-                                attr {
-                                    size(10f, 20f)
-                                    src(ImageUri.commonAssets("icon_arrow_right.png"))
-                                }
-                            }
-                        }
-                        // 分割线
-                        View {
-                            attr {
-                                height(1f)
-                                width(pagerData.pageViewWidth)
-//                                backgroundColor(Color.GRAY)
-                            }
-                        }
                         // item test
                         View {
                             attr {
@@ -270,7 +227,50 @@ internal class PersonView : ComposeView<PersonViewAttr, PersonViewEvent>() {
                                 attr {
                                     margin(left = 10f, right = 10f)
                                     flex(1f)
-                                    text("test")
+                                    text("TestPage")
+                                    fontSize(18f)
+                                }
+                            }
+                            Image {
+                                attr {
+                                    size(10f, 20f)
+                                    src(ImageUri.commonAssets("icon_arrow_right.png"))
+                                }
+                            }
+                        }
+                        // 分割线 RouterPage
+                        View {
+                            attr {
+                                height(1f)
+                                width(pagerData.pageViewWidth)
+//                                backgroundColor(Color.GRAY)
+                            }
+                        }
+                        // item
+                        View {
+                            attr {
+                                alignItemsCenter()
+                                flexDirectionRow()
+                                backgroundColor(Color.WHITE)
+                                minHeight(60f)
+                                padding(left = 10f, right = 10f)
+                            }
+                            event {
+                                click {
+                                    routerModule.openPage("router")
+                                }
+                            }
+                            Image {
+                                attr {
+                                    size(20f, 20f)
+                                    src(ImageUri.commonAssets("icon_home_selected.png"))
+                                }
+                            }
+                            Text {
+                                attr {
+                                    margin(left = 10f, right = 10f)
+                                    flex(1f)
+                                    text("RouterPage")
                                     fontSize(18f)
                                 }
                             }

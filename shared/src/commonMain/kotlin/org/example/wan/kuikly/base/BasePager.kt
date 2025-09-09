@@ -10,7 +10,9 @@ internal abstract class BasePager : Pager() {
 
     override fun createExternalModules(): Map<String, Module>? {
         val externalModules = hashMapOf<String, Module>()
+        // Kuikly 注册 Module
         externalModules[BridgeModule.MODULE_NAME] = BridgeModule()
+        externalModules[LogModule.MODULE_NAME] = LogModule()
         return externalModules
     }
 

@@ -26,7 +26,7 @@ import org.example.wan.kuikly.adapter.KRRouterAdapter
 import org.example.wan.kuikly.adapter.KRThreadAdapter
 import org.example.wan.kuikly.adapter.KRUncaughtExceptionHandlerAdapter
 import org.example.wan.kuikly.module.KRBridgeModule
-import org.example.wan.kuikly.module.KRShareModule
+import org.example.wan.kuikly.module.KRLogModule
 import org.json.JSONObject
 
 class KuiklyRenderActivity : AppCompatActivity(), KuiklyRenderViewBaseDelegatorDelegate {
@@ -94,11 +94,12 @@ class KuiklyRenderActivity : AppCompatActivity(), KuiklyRenderViewBaseDelegatorD
     override fun registerExternalModule(kuiklyRenderExport: IKuiklyRenderExport) {
         super.registerExternalModule(kuiklyRenderExport)
         with(kuiklyRenderExport) {
+            // Native 注册 Module
             moduleExport(KRBridgeModule.MODULE_NAME) {
                 KRBridgeModule()
             }
-            moduleExport(KRShareModule.MODULE_NAME) {
-                KRShareModule()
+            moduleExport(KRLogModule.MODULE_NAME) {
+                KRLogModule()
             }
         }
     }

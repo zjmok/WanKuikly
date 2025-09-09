@@ -1,4 +1,4 @@
-package org.example.wan.kuikly.page.main
+package org.example.wan.kuikly.page.settings
 
 import com.tencent.kuikly.core.annotations.Page
 import com.tencent.kuikly.core.base.Color
@@ -233,7 +233,7 @@ internal class SettingsPage : BasePager() {
 //                                backgroundColor(Color.GRAY)
                             }
                         }
-                        // item
+                        // item 源码
                         View {
                             attr {
                                 alignItemsCenter()
@@ -244,7 +244,7 @@ internal class SettingsPage : BasePager() {
                             }
                             event {
                                 click {
-                                    toast("click")
+                                    toast("source code" )
                                 }
                             }
                             Image {
@@ -257,8 +257,16 @@ internal class SettingsPage : BasePager() {
                                 attr {
                                     margin(left = 10f, right = 10f)
                                     flex(1f)
-                                    text("item")
+                                    text("源码")
                                     fontSize(18f)
+                                }
+                            }
+                            Text {
+                                attr {
+                                    text("WanKuikly")
+                                    color(Color.SecondaryText)
+                                    fontSize(16f)
+                                    margin(right = 10f)
                                 }
                             }
                             Image {

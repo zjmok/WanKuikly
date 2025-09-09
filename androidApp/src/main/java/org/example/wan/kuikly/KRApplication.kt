@@ -16,6 +16,7 @@ class KRApplication : Application() {
 
     override fun onCreate() {
         super.onCreate()
+
         initToaster()
     }
 
@@ -27,6 +28,7 @@ class KRApplication : Application() {
             0,
             200
         )
+
     }
 
 }

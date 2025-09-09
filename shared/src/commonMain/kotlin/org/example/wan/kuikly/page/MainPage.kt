@@ -1,4 +1,4 @@
-package org.example.wan.kuikly.page.main
+package org.example.wan.kuikly.page
 
 import com.tencent.kuikly.core.annotations.Page
 import com.tencent.kuikly.core.base.Color
@@ -20,10 +20,10 @@ import com.tencent.kuikly.core.views.Tabs
 import com.tencent.kuikly.core.views.Text
 import com.tencent.kuikly.core.views.View
 import org.example.wan.kuikly.base.BasePager
-import org.example.wan.kuikly.page.main.view.ArticleTree
-import org.example.wan.kuikly.page.main.view.HomeList
-import org.example.wan.kuikly.page.main.view.Person
-import org.example.wan.kuikly.page.main.view.SquareTree
+import org.example.wan.kuikly.page.common.ArticleTree
+import org.example.wan.kuikly.page.home.HomeList
+import org.example.wan.kuikly.page.person.Person
+import org.example.wan.kuikly.page.square.SquareTree
 import org.example.wan.kuikly.utils.Back
 import org.example.wan.kuikly.utils.Fore
 

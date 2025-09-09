@@ -1,4 +1,4 @@
-package org.example.wan.kuikly.page.main.view
+package org.example.wan.kuikly.page.square
 
 import com.tencent.kuikly.core.base.Color
 import com.tencent.kuikly.core.base.ComposeAttr
@@ -22,6 +22,8 @@ import org.example.wan.kuikly.data.DataX
 import org.example.wan.kuikly.data.remote.WanAPI.BASE_URL
 import org.example.wan.kuikly.data.remote.WanAPI.QA_LIST
 import org.example.wan.kuikly.data.remote.WanAPI.SQUARE_LIST
+import org.example.wan.kuikly.page.common.ArticleList
+import org.example.wan.kuikly.page.common.TreeTabItem
 import org.example.wan.kuikly.utils.Fore
 import org.example.wan.kuikly.utils.fromJson
 import org.example.wan.kuikly.utils.networkModule
