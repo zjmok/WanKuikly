@@ -4,6 +4,8 @@ import android.content.ClipData
 import android.content.ClipboardManager
 import android.content.Context
 import android.util.Log
+import com.hjq.toast.ToastLogInterceptor
+import com.hjq.toast.ToastParams
 import com.hjq.toast.Toaster
 import com.tencent.kuikly.core.render.android.export.KuiklyRenderBaseModule
 import com.tencent.kuikly.core.render.android.export.KuiklyRenderCallback
@@ -98,7 +100,10 @@ class KRBridgeModule : KuiklyRenderBaseModule() {
         }
         val paramJSON = JSONObject(params)
         val message = paramJSON.optString("content")
-        Toaster.show(message)
+        Toaster.show(ToastParams().apply {
+            text = message.toString()
+            interceptor = ToastLogInterceptor(-1)
+        })
     }
 
     private fun copyToPasteboard(params: String?) {

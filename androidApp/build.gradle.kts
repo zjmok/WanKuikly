@@ -62,6 +62,8 @@ dependencies {
     annotationProcessor("com.github.bumptech.glide:compiler:4.16.0")
 
     // https://github.com/getActivity/Toaster
-    implementation("com.github.getActivity:Toaster:13.5")
+//    implementation("com.github.getActivity:Toaster:13.5")
+    // https://github.com/zjmok/Toaster
+    implementation("com.github.zjmok:Toaster:13.5.2") // 基于 13.5 的修改版
 
 }

@@ -1,8 +1,14 @@
 package org.example.wan.kuikly
 
 import android.app.Application
+import android.content.Context
+import android.graphics.drawable.Drawable
+import android.graphics.drawable.GradientDrawable
+import android.util.TypedValue
 import android.view.Gravity
 import com.hjq.toast.Toaster
+import com.hjq.toast.style.BlackToastStyle
+import com.hjq.toast.style.LocationToastStyle
 
 class KRApplication : Application() {
 
@@ -21,14 +27,22 @@ class KRApplication : Application() {
     }
 
     private fun initToaster() {
-        // 初始化 Toast 框架
         Toaster.init(this)
-        Toaster.setGravity(
-            Gravity.CENTER or Gravity.BOTTOM,
-            0,
-            200
-        )
-
+        Toaster.setStyle(object : BlackToastStyle() {
+            override fun getBackgroundDrawable(context: Context): Drawable {
+                return (super.getBackgroundDrawable(context) as GradientDrawable).apply {
+                    setCornerRadius(
+                        TypedValue.applyDimension(
+                            TypedValue.COMPLEX_UNIT_DIP,
+                            999f,
+                            context.resources.displayMetrics
+                        )
+                    )
+                }
+            }
+        }.let {
+            LocationToastStyle(it, Gravity.CENTER or Gravity.BOTTOM, 0, 200, 0f, 0f)
+        })
     }
 
 }
