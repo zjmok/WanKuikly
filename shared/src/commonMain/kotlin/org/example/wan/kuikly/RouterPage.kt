@@ -25,7 +25,7 @@ import com.tencent.kuikly.core.views.compose.Button
 import org.example.wan.kuikly.base.BasePager
 import org.example.wan.kuikly.utils.toast
 
-@Page("router", supportInLocal = true)
+@Page("realRouter", supportInLocal = true)
 internal class RouterPage : BasePager() {
 
     var inputText: String = ""

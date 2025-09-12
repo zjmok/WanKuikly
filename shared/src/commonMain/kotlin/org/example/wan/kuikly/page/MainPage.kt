@@ -27,43 +27,28 @@ import org.example.wan.kuikly.page.square.SquareTree
 import org.example.wan.kuikly.utils.Back
 import org.example.wan.kuikly.utils.Fore
 
-internal class MainTabItem {
-    var id by observable("")
-    var tabTitle by observable("")
-    var tabImg by observable("")
-    var pageBgColor by observable(Color.WHITE)
-}
-
-@Page("main")
+@Page("router")
 internal class MainPage : BasePager() {
 
     private var pageListRef: ViewRef<PageListView<*, *>>? = null
     private var scrollParams: ScrollParams? by observable(null)
 
-    private val tabDataList by observableList<MainTabItem>()
+    private val tabDataList by observableList<Pair<String, String>>()
 
     private var defaultIndex = 0
 
     override fun created() {
         super.created()
-        val list =
+
+        tabDataList.addAll(
             listOf(
-                mapOf("title" to "首页", "img" to "icon_home"),
-                mapOf("title" to "项目", "img" to "icon_project"),
-                mapOf("title" to "广场", "img" to "icon_square"),
-                mapOf("title" to "订阅", "img" to "icon_subscribe"),
-                mapOf("title" to "我", "img" to "icon_person"),
-//                mapOf("title" to "体系", "img" to "tree"),
-//                mapOf("title" to "导航", "img" to "navi"),
-//                mapOf("title" to "收藏", "img" to "collect"),
+                "首页" to "icon_home",
+                "项目" to "icon_project",
+                "广场" to "icon_square",
+                "订阅" to "icon_subscribe",
+                "我" to "icon_person"
             )
-        tabDataList.clear()
-        tabDataList.addAll(list.map {
-            MainTabItem().apply {
-                tabTitle = it["title"] ?: ""
-                tabImg = it["img"] ?: ""
-            }
-        })
+        )
 
         // 宽高
         println("pagerData.statusBarHeight = ${pagerData.statusBarHeight}")
@@ -127,14 +112,14 @@ internal class MainPage : BasePager() {
                                         // 使用 assets 资源
                                         // assets-resource.md
                                         // https://kuikly.tds.qq.com/DevGuide/assets-resource.html
-                                        val imageUri0 = ImageUri.commonAssets("${tabItem.tabImg}.png")
-                                        val imageUri1 = ImageUri.commonAssets("${tabItem.tabImg}_selected.png")
+                                        val imageUri0 = ImageUri.commonAssets("${tabItem.second}.png")
+                                        val imageUri1 = ImageUri.commonAssets("${tabItem.second}_selected.png")
                                         src(if (state.selected) imageUri1 else imageUri0)
                                     }
                                 }
                                 Text {
                                     attr {
-                                        text(tabItem.tabTitle)
+                                        text(tabItem.first)
                                         fontSize(16f)
                                         color(if (state.selected) Color.Fore else Color.Back)
                                     }
@@ -198,7 +183,7 @@ internal class MainPage : BasePager() {
                             attr {
                                 allCenter()
                             }
-                            when (item.tabTitle) {
+                            when (item.first) {
                                 "首页", "推荐" -> {
                                     HomeList { }
                                 }
@@ -218,7 +203,7 @@ internal class MainPage : BasePager() {
                                 }
 
                                 "项目", "订阅", "公众号" -> {
-                                    ArticleTree(item.tabTitle) {
+                                    ArticleTree(item.first) {
                                         attr {
                                             width(pagerData.pageViewWidth)
                                             height(

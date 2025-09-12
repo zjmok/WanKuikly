@@ -36,17 +36,20 @@ android {
     kotlinOptions {
         jvmTarget = "1.8"
     }
-//    java {
-//        toolchain {
-//            languageVersion = JavaLanguageVersion.of(17)
-//        }
-//    }
-//    kotlin {
-//        jvmToolchain(17)
-//    }
 }
 
 dependencies {
+    configurations.all {
+        // 剔除指定库
+//        exclude(group = "org.slf4j", module = "slf4j-api")
+        // 强制指定版本
+        resolutionStrategy {
+            // 2.0.17 新版，报错
+            // 1.7.36 旧版，兼容
+            force("org.slf4j:slf4j-api:1.7.36")
+        }
+    }
+
     implementation(project(":shared"))
 
     implementation("androidx.recyclerview:recyclerview:1.2.1")
@@ -60,6 +63,9 @@ dependencies {
     // https://github.com/bumptech/glide
     implementation("com.github.bumptech.glide:glide:4.16.0")
     annotationProcessor("com.github.bumptech.glide:compiler:4.16.0")
+
+//    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:${Version.KOTLINX_COROUTINES_VERSION}")
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:${Version.KOTLINX_COROUTINES_VERSION}")
 
     // https://github.com/getActivity/Toaster
 //    implementation("com.github.getActivity:Toaster:13.5")

@@ -19,5 +19,8 @@ dependencyResolutionManagement {
 }
 
 rootProject.name = "WanKuikly"
+//include(":kmp") // kmp
+include(":shared") // kuikly
 include(":androidApp")
-include(":shared")
+include(":h5App")
+include(":miniApp")

@@ -27,6 +27,11 @@
 common
 - `kotlinx-serialization`
 - `kuiklyx-coroutines` 目前还有问题
+- `ktor-client-core` + KMP
+  - `ktor-client-okhttp`
+  - `ktor-client-darwin`
+  - `ktor-client-js`
+  - `ktor-client-java`
 
 android
 - `Toaster`
@@ -35,12 +40,10 @@ android
 
 todo，待完成
 
-- WebPager
-- 搜索页面
 - 下拉上拉处理
+- WebPager
 - 登录，存储
-- 懒加载优化
-- shared模块的协程问题
+- 搜索页面
 - 解决硬编码
 - 
 
@@ -48,11 +51,11 @@ todo，待完成
 
 存在的问题
 
-- common 协程未成功接入
-- html 标签的显示
+- 使用 kotlinx-serialization 后 h5App 运行失败
+- html 解析
 - 多个容器高度设置 0.5f，显示不一致，多个分割线大小不一致，在模拟器上 1f 也大小不一致
+- ListPage 懒加载优化
 - Android API 未适配到最新版，最高支持 34
-- 
 
 ---
 
@@ -112,8 +115,119 @@ kuikly.ohosGradleSettings=settings.ohos.gradle.kts
 
 ## MiniApp
 
-无
+npm 配置 包安装
+
+```
+# npm 换源
+npm config set registry https://registry.npmmirror.com
+```
+
+```
+cd static_server
+# 安装
+npm install
+```
+
+运行开发服务器
+
+```
+# 运行 shared 项目 dev server 服务器，没有安装 npm 包则先 npm install 安装一下依赖
+npm run serve
+
+#  构建 shared 项目 Debug 版
+./gradlew :shared:packLocalJsBundleDebug
+```
+
+构建 miniApp 项目
+
+```
+#  运行 miniApp 服务器 Debug 版
+./gradlew :miniApp:jsMiniAppDevelopmentWebpack
+```
+
+构建 release 版本
+
+```
+# 首先构建业务 Bundle
+./gradlew :demo:packLocalJSBundleRelease
+
+# 然后构建 miniApp
+./gradlew :miniApp:jsMiniAppProductionWebpack
+```
+
+使用微信小程序开发者工具打开miniApp下的dist目录，
+修改app.json里面的pages数组和在pages里新建对应的页面（改为项目这里的页面）
+
+```
+// 例如demo里存在router的Page, 就需要在app.json的pages数组里添加 "pages/router/index", 同时在pages的目录里新建router目录补充和pages/index目录一样的内容
+
+// pages/index/index.js内容
+var render = require('../../lib/miniApp.js')
+render.renderView({
+    // 这里的pageName是最高优先级，如果没配置，会去拿微信小程序启动参数里的page_name，如果都没有会报错
+    // 建议微信小程序的第一个页面必须配置pageName
+    // pageName: "router",
+    statusBarHeight: 0 // 如果要全屏，需要把状态栏高度设置为0
+})
+```
+
+复制本地静态资源
+
+```
+// 复制业务的assets文件到微信小程序目录
+./gradlew :miniApp:copyAssets
+```
 
 ## H5App
 
-无
+npm 配置 包安装
+
+```
+# npm 换源
+npm config set registry https://registry.npmmirror.com
+
+# 安装
+npm install
+```
+
+运行开发服务器
+
+```
+# 运行 shared 项目 dev server 服务器，没有安装 npm 包则先 npm install 安装一下依赖
+npm run serve
+
+#  构建 shared 项目 Debug 版
+./gradlew :shared:packLocalJsBundleDebug
+```
+
+构建运行 h5App 项目
+
+```
+#  运行 h5App 服务器 Debug 版
+./gradlew :h5App:jsBrowserRun -t
+kotlin 2.0 以上运行: 
+./gradlew :h5App:jsBrowserDevelopmentRun -t
+
+如果window平台因为编译iOS模块失败，可以参考"快速开始-环境搭建"指引配置
+# 拷贝 assets 资源到 dev server
+./gradlew :h5App:copyAssetsToWebpackDevServer
+```
+
+只构建 h5App 产物，不运行开发服务器
+
+```
+#  构建 h5App webpack 打包 Debug 版
+./gradlew :h5App:jsBrowserDevelopmentWebpack
+#  构建 h5App webpack 打包 Release 版
+./gradlew :h5App:jsBrowserProductionWebpack
+```
+
+项目发布
+
+```
+# 构建业务 h5App 和 JSBundle
+# 首先构建业务 Bundle
+./gradlew :shared:packLocalJSBundleRelease
+# 然后构建宿主 APP
+./gradlew :h5App:publishLocalJSBundle
+```

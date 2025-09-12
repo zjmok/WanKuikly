@@ -4,6 +4,8 @@ plugins {
     id("com.android.library")
     id("com.google.devtools.ksp")
     id("maven-publish")
+    id("com.tencent.kuikly-open.kuikly")
+    kotlin("plugin.serialization")
 
 }
 
@@ -48,6 +50,8 @@ kotlin {
                 implementation("com.tencent.kuikly-open:core:${Version.getKuiklyOhosVersion()}")
                 implementation("com.tencent.kuikly-open:core-annotations:${Version.getKuiklyOhosVersion()}")
 
+                // TODO
+
             }
         }
         val commonTest by getting {
@@ -60,6 +64,10 @@ kotlin {
                 api("com.tencent.kuikly-open:core-render-android:${Version.getKuiklyOhosVersion()}")
             }
         }
+        val jsMain by getting
+        jsMain.dependencies {
+
+        }
 
         val iosX64Main by getting
         val iosArm64Main by getting
@@ -69,6 +77,9 @@ kotlin {
             iosX64Main.dependsOn(this)
             iosArm64Main.dependsOn(this)
             iosSimulatorArm64Main.dependsOn(this)
+        }
+        iosMain.dependencies {
+
         }
         val iosX64Test by getting
         val iosArm64Test by getting

@@ -32,6 +32,9 @@ kotlin {
             commonWebpackConfig {
                 output?.library = null // 不导出全局对象，只导出必要的入口函数
                 devtool = "source-map" // 不使用默认的 eval 执行方式构建出 source-map，而是构建单独的 sourceMap 文件
+//                devtool = null
+//                devtool = WebpackDevtool.EVAL_SOURCE_MAP // h5 使用 eval 执行方式构建，调试 kotlin 源码
+//                devtool = WebpackDevtool.INLINE_SOURCE_MAP // 小程序不支持 eval，建议使用 inline_source_map，生产环境建议不要配置sourcemap
             }
         }
         binaries.executable() //将kotlin.js与kotlin代码打包成一份可直接运行的js文件
@@ -57,34 +60,56 @@ kotlin {
     }
 
     sourceSets {
+        val ktorVersion = "3.1.3" // 3.2.3 // 3.1.3 // 3.0.3
+        val okioVersion = "3.10.2"
         val commonMain by getting {
             dependencies {
+//                implementation(project(":kmp"))
+
                 implementation("com.tencent.kuikly-open:core:${Version.getKuiklyVersion()}")
                 implementation("com.tencent.kuikly-open:core-annotations:${Version.getKuiklyVersion()}")
 
-                // 需要注意，使用的库是否支持多平台，纯 java/kotlin 实现
-                // kuiklyx 协程
+                // 需要注意，使用的库是否支持多平台，或纯 kotlin 实现
+
+                // kotlin 协程
+                // https://mvnrepository.com/artifact/org.jetbrains.kotlinx/kotlinx-coroutines-core
+                implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:${Version.KOTLINX_COROUTINES_VERSION}")
+                // kuiklyx 内建协程
+                // https://kuikly.tds.qq.com/DevGuide/thread-and-coroutines.html#kuikly协程api和依赖库
                 implementation("com.tencent.kuiklyx-open:coroutines:${Version.KUIKLYX_COROUTINES_VERSION}")
                 // kotlinx-serialization
                 // https://mvnrepository.com/artifact/org.jetbrains.kotlinx/kotlinx-serialization-json
-                implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.8.1")
+                implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:${Version.KOTLINX_SERIALIZATION_VERSION}")
                 // ktor
-//                val ktorVersion = "3.2.3"
-//                implementation("io.ktor:ktor-client-core:$ktorVersion") // 核心库
-//                implementation("io.ktor:ktor-client-content-negotiation:$ktorVersion") // 内容协商（用于JSON序列化）
-//                implementation("io.ktor:ktor-serialization-kotlinx-json:$ktorVersion") // Kotlinx.serialization JSON支持
+                // https://mvnrepository.com/artifact/io.ktor/ktor-client-core
+                implementation("io.ktor:ktor-client-core:$ktorVersion") // 核心库
+                implementation("io.ktor:ktor-client-content-negotiation:$ktorVersion") // 内容协商（用于JSON序列化）
+                implementation("io.ktor:ktor-serialization-kotlinx-json:$ktorVersion") // Kotlinx.serialization JSON支持
+                // okio, js 使用 node.js 实现
+                // https://square.ac.cn/okio/multiplatform/
+//                implementation("com.squareup.okio:okio:$okioVersion")
 
             }
         }
         val commonTest by getting {
             dependencies {
-                implementation(kotlin("test"))
+                api(kotlin("test"))
+//                api("com.squareup.okio:okio-fakefilesystem:$okioVersion")
             }
         }
         val androidMain by getting {
             dependencies {
                 api("com.tencent.kuikly-open:core-render-android:${Version.getKuiklyVersion()}")
+
+                api("io.ktor:ktor-client-okhttp:$ktorVersion")
             }
+        }
+        val jsMain by getting
+        jsMain.dependencies {
+            api("io.ktor:ktor-client-js:$ktorVersion")
+
+            // js 使用 node.js 实现
+//            api("com.squareup.okio:okio-nodefilesystem:$okioVersion")
         }
 
         val iosX64Main by getting
@@ -95,6 +120,9 @@ kotlin {
             iosX64Main.dependsOn(this)
             iosArm64Main.dependsOn(this)
             iosSimulatorArm64Main.dependsOn(this)
+        }
+        iosMain.dependencies {
+            api("io.ktor:ktor-client-darwin:$ktorVersion")
         }
         val iosX64Test by getting
         val iosArm64Test by getting

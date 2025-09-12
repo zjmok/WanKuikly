@@ -13,17 +13,23 @@ val json = Json {
 // kotlinx-serialization 不能序列化 Any，(Gson 可以使用 Any，Gson 是通过反射获取实际类型)
 // 所以这里只能使用泛型 T，并且是 reified，确保是实际类型
 inline fun <reified T> T.toJson(format: Boolean = true): String {
-    val json = Json(json) {
-        prettyPrint = format
+    return try {
+        val json = Json(json) {
+            prettyPrint = format
+        }
+        val encodeToString = json.encodeToString(this)
+        encodeToString
+    } catch (e: Exception) {
+        e.printStackTrace()
+        ""
     }
-    val encodeToString = json.encodeToString(this)
-    return encodeToString
 }
 
 inline fun <reified T> fromJson(jsonString: String): T? {
     return try {
         json.decodeFromString<T>(jsonString)
     } catch (e: Exception) {
+        e.printStackTrace()
         null
     }
 }

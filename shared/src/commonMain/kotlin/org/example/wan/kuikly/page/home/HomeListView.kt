@@ -15,6 +15,7 @@ import org.example.wan.kuikly.data.remote.WanAPI.HOME_LIST
 import org.example.wan.kuikly.page.common.ArticleList
 import org.example.wan.kuikly.page.common.TreeTabItem
 import org.example.wan.kuikly.utils.fromJson
+import org.example.wan.kuikly.utils.log
 import org.example.wan.kuikly.utils.networkModule
 import org.example.wan.kuikly.utils.toast
 
@@ -44,7 +45,7 @@ internal class HomeListView : ComposeView<HomeListViewAttr, HomeListViewEvent>()
     private fun loadBanner() {
         val url = BASE_URL + BANNER_LIST
 
-        println("url = $url")
+        log("url = $url")
         networkModule.requestGet(url, JSONObject()) { data, success, errorMsg, response ->
             if (success.not()) {
                 toast(errorMsg)
@@ -71,7 +72,7 @@ internal class HomeListView : ComposeView<HomeListViewAttr, HomeListViewEvent>()
             put("page_size", "10")
         }
 
-        println("url = $url")
+        log("url = $url")
         networkModule.requestGet(url, param) { data, success, errorMsg, response ->
             if (success.not()) {
                 toast(errorMsg)
@@ -97,18 +98,18 @@ internal class HomeListView : ComposeView<HomeListViewAttr, HomeListViewEvent>()
     override fun body(): ViewBuilder {
         val ctx = this
         return {
-            ArticleList(
-                tabItem = ctx.tabItem,
-                height = ctx.pagerData.pageViewHeight
-                        - ctx.pagerData.safeAreaInsets.top
-                        - ctx.pagerData.safeAreaInsets.bottom
-//                        - 50f // 二级 tab 高
-                        - 60f // 一级 tab 高
-                        - 0.5f // 分割线高
-                        - 0.5f // 分割线高
-            ) {
+            ArticleList {
                 attr {
-
+                    tabItem = ctx.tabItem
+                    listHeight = (
+                            ctx.pagerData.pageViewHeight
+                                    - ctx.pagerData.safeAreaInsets.top
+                                    - ctx.pagerData.safeAreaInsets.bottom
+                                    //                        - 50f // 二级 tab 高
+                                    - 60f // 一级 tab 高
+                                    - 0.5f // 分割线高
+                                    - 0.5f // 分割线高
+                            )
                 }
             }
         }

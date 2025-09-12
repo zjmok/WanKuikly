@@ -34,26 +34,38 @@ fun Any?.isNull(): Boolean {
  * this != null 时执行 block
  */
 @OptIn(ExperimentalContracts::class)
-fun <T, R> T?.takeNotNull(block: (T) -> R): R? {
+fun <T, R> T?.takeNotNull(block: (T) -> R) {
     contract {
         callsInPlace(block, InvocationKind.EXACTLY_ONCE)
     }
     if (this == null) {
-        return null
+        return
     }
-    return block(this)
+    block(this)
 }
 
 /**
  * this == null 时执行 block
  */
 @OptIn(ExperimentalContracts::class)
-fun <R> Any?.takeNull(block: () -> R): R? {
+fun <R> Any?.takeNull(block: () -> R) {
     contract {
         callsInPlace(block, InvocationKind.EXACTLY_ONCE)
     }
     if (this != null) {
-        return null
+        return
     }
-    return block()
+    block()
+}
+
+@OptIn(ExperimentalContracts::class)
+fun (() -> Unit).catch(block: (Throwable) -> Unit) {
+    contract {
+        callsInPlace(block, InvocationKind.EXACTLY_ONCE)
+    }
+    return try {
+        invoke()
+    } catch (e: Throwable) {
+        block(e)
+    }
 }

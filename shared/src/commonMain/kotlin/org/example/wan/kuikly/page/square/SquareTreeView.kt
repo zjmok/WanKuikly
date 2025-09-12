@@ -26,6 +26,7 @@ import org.example.wan.kuikly.page.common.ArticleList
 import org.example.wan.kuikly.page.common.TreeTabItem
 import org.example.wan.kuikly.utils.Fore
 import org.example.wan.kuikly.utils.fromJson
+import org.example.wan.kuikly.utils.log
 import org.example.wan.kuikly.utils.networkModule
 import org.example.wan.kuikly.utils.toast
 
@@ -73,7 +74,7 @@ internal class SquareTreeView : ComposeView<SquareTreeViewAttr, SquareTreeViewEv
         if (index >= tabList.size) {
             return
         }
-        println("加载数据 index=$index")
+        log("加载数据 index=$index")
 
         var url = ""
         val param = JSONObject()
@@ -105,7 +106,8 @@ internal class SquareTreeView : ComposeView<SquareTreeViewAttr, SquareTreeViewEv
             }
         }
 
-        println("url = $url")
+        log("url = $url")
+
         networkModule.requestGet(url, param) { data, success, errorMsg, response ->
             if (success.not()) {
                 toast(errorMsg)
@@ -223,7 +225,7 @@ internal class SquareTreeView : ComposeView<SquareTreeViewAttr, SquareTreeViewEv
                             (index as? JSONObject)?.let {
                                 val value = it.opt("index")
                                 value.toString().toIntOrNull()?.let { realIndex ->
-                                    println("二级Tab index = $realIndex")
+                                    log("二级Tab index = $realIndex")
                                     // 加载 index 数据，手动实现懒加载
                                     if (realIndex < ctx.tabList.size && ctx.tabList[realIndex].isLoad.not()) {
                                         ctx.loadData(realIndex)
@@ -245,19 +247,18 @@ internal class SquareTreeView : ComposeView<SquareTreeViewAttr, SquareTreeViewEv
 //                                    color(Color.BLUE)
 //                                }
 //                            }
-                            val tabItem = ctx.tabList[index]
-                            ArticleList(
-                                tabItem = tabItem,
-                                height = ctx.pagerData.pageViewHeight
-                                        - ctx.pagerData.safeAreaInsets.top
-                                        - ctx.pagerData.safeAreaInsets.bottom
-                                        - 50f // 二级 tab 高
-                                        - 60f // 一级 tab 高
-                                        - 0.5f // 分割线高
-                                        - 0.5f // 分割线高
-                            ) {
+                            ArticleList {
                                 attr {
-
+                                    tabItem = ctx.tabList[index]
+                                    listHeight = (
+                                            ctx.pagerData.pageViewHeight
+                                                    - ctx.pagerData.safeAreaInsets.top
+                                                    - ctx.pagerData.safeAreaInsets.bottom
+                                                    - 50f // 二级 tab 高
+                                                    - 60f // 一级 tab 高
+                                                    - 0.5f // 分割线高
+                                                    - 0.5f // 分割线高
+                                            )
                                 }
                             }
                         }

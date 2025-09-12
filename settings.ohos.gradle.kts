@@ -10,6 +10,7 @@ pluginManagement {
 
 dependencyResolutionManagement {
     repositories {
+        maven("https://jitpack.io")
         maven("https://mirrors.tencent.com/nexus/repository/maven-public")
         mavenCentral() // https://repo.maven.apache.org/maven2, https://mvnrepository.com/
         google() // https://maven.google.com
@@ -22,6 +23,7 @@ rootProject.name = "WanKuikly"
 val buildFileName = "build.ohos.gradle.kts"
 rootProject.buildFileName = buildFileName
 
-include(":androidApp")
-include(":shared")
+//include(":androidApp")
+//include(":kmp") // kmp
+include(":shared") // kuikly
 project(":shared").buildFileName = buildFileName

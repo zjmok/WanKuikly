@@ -4,6 +4,7 @@ import android.content.ClipData
 import android.content.ClipboardManager
 import android.content.Context
 import android.util.Log
+import androidx.appcompat.app.AlertDialog
 import com.hjq.toast.ToastLogInterceptor
 import com.hjq.toast.ToastParams
 import com.hjq.toast.Toaster
@@ -138,6 +139,45 @@ class KRBridgeModule : KuiklyRenderBaseModule() {
         val titleText = paramJSON.optString("title")
         val message = paramJSON.optString("message")
         val buttons = paramJSON.optJSONArray("buttons") ?: JSONArray()
+        AlertDialog.Builder(context ?: return).apply {
+            setTitle(titleText)
+            setMessage(message)
+            if (buttons.length() == 0) {
+                setPositiveButton("确定") { dialog, _ ->
+                    dialog.dismiss()
+                    callback?.invoke(JSONObject().apply {
+                        put("right", true)
+                    })
+                }
+            } else if (buttons.length() == 1) {
+                val btn = buttons.optString(0)
+                setPositiveButton(btn) { dialog, _ ->
+                    dialog.dismiss()
+                    callback?.invoke(JSONObject().apply {
+                        put("right", true)
+                    })
+                }
+            } else {
+                val positiveBtn = buttons.optString(1)
+                val negativeBtn = buttons.optString(0)
+                setNegativeButton(negativeBtn) { dialog, _ ->
+                    dialog.dismiss()
+                    callback?.invoke(JSONObject().apply {
+                        put("left", true)
+                    })
+                }
+                setPositiveButton(positiveBtn) { dialog, _ ->
+                    dialog.dismiss()
+                    callback?.invoke(JSONObject().apply {
+                        put("right", true)
+                    })
+                }
+            }
+//            setCancelable(false)
+            setOnCancelListener { callback?.invoke(JSONObject().apply {
+                put("cancel", true)
+            }) }
+        }.create().show()
     }
 
     private fun ssoRequest(params: String?, callback: KuiklyRenderCallback?) {}

@@ -18,6 +18,7 @@ import com.tencent.kuikly.core.views.TabItem
 import com.tencent.kuikly.core.views.Tabs
 import com.tencent.kuikly.core.views.Text
 import com.tencent.kuikly.core.views.View
+import kotlinx.serialization.json.Json
 import org.example.wan.kuikly.data.ArticlesTreeItem
 import org.example.wan.kuikly.data.BannerItem
 import org.example.wan.kuikly.data.DataX
@@ -28,6 +29,7 @@ import org.example.wan.kuikly.data.remote.WanAPI.WX_LIST
 import org.example.wan.kuikly.data.remote.WanAPI.WX_TREE
 import org.example.wan.kuikly.utils.Fore
 import org.example.wan.kuikly.utils.fromJson
+import org.example.wan.kuikly.utils.log
 import org.example.wan.kuikly.utils.networkModule
 import org.example.wan.kuikly.utils.toast
 
@@ -80,7 +82,7 @@ internal class ArticleTreeView : ComposeView<ArticleTreeViewAttr, ArticleTreeVie
                 url = BASE_URL + WX_TREE
             }
         }
-        println("url = $url")
+        log("url = $url")
         networkModule.requestGet(url, JSONObject().apply {
 //            put("", "")
         }) { data, success, errorMsg, response ->
@@ -97,7 +99,7 @@ internal class ArticleTreeView : ComposeView<ArticleTreeViewAttr, ArticleTreeVie
 
     private fun setTabList(data: JSONObject) {
         val tree = data.optJSONArray("data")
-
+        Json.decodeFromString<List<ArticlesTreeItem>>(tree.toString())
         val list = fromJson<List<ArticlesTreeItem>>(tree.toString()) ?: return
 //        println(list)
 
@@ -123,7 +125,7 @@ internal class ArticleTreeView : ComposeView<ArticleTreeViewAttr, ArticleTreeVie
         if (index >= tabList.size) {
             return
         }
-        println("加载数据 index=$index")
+        log("加载数据 index=$index")
 
         val id = tabList[index].tabId
         var url = ""
@@ -154,7 +156,7 @@ internal class ArticleTreeView : ComposeView<ArticleTreeViewAttr, ArticleTreeVie
 
         }
 
-        println("url = $url")
+        log("url = $url")
         networkModule.requestGet(url, param) { data, success, errorMsg, response ->
             if (success.not()) {
                 toast(errorMsg)
@@ -273,7 +275,7 @@ internal class ArticleTreeView : ComposeView<ArticleTreeViewAttr, ArticleTreeVie
                             (index as? JSONObject)?.let {
                                 val value = it.opt("index")
                                 value.toString().toIntOrNull()?.let { realIndex ->
-                                    println("二级Tab index = $realIndex")
+                                    log("二级Tab index = $realIndex")
                                     // 加载 index 数据，手动实现懒加载
                                     if (realIndex < ctx.tabList.size && ctx.tabList[realIndex].isLoad.not()) {
                                         ctx.loadData(realIndex)
@@ -295,19 +297,18 @@ internal class ArticleTreeView : ComposeView<ArticleTreeViewAttr, ArticleTreeVie
 //                                    color(Color.BLUE)
 //                                }
 //                            }
-                            val tabItem = ctx.tabList[index]
-                            ArticleList(
-                                tabItem = tabItem,
-                                height = ctx.pagerData.pageViewHeight
-                                        - ctx.pagerData.safeAreaInsets.top
-                                        - ctx.pagerData.safeAreaInsets.bottom
-                                        - 50f // 二级 tab 高
-                                        - 60f // 一级 tab 高
-                                        - 0.5f // 分割线高
-                                        - 0.5f // 分割线高
-                            ) {
+                            ArticleList {
                                 attr {
-
+                                    tabItem = ctx.tabList[index]
+                                    listHeight = (
+                                            ctx.pagerData.pageViewHeight
+                                                    - ctx.pagerData.safeAreaInsets.top
+                                                    - ctx.pagerData.safeAreaInsets.bottom
+                                                    - 50f // 二级 tab 高
+                                                    - 60f // 一级 tab 高
+                                                    - 0.5f // 分割线高
+                                                    - 0.5f // 分割线高
+                                            )
                                 }
                             }
                         }
