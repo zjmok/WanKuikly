@@ -44,8 +44,8 @@ class KuiklyRenderActivity : AppCompatActivity(), KuiklyRenderViewBaseDelegatorD
                 return pn
             } else {
                 // Kuikly 入口 page
-//                "realRouter"
-                "router"
+//                "router"
+                "main"
             }
         }
 

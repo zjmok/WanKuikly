@@ -246,7 +246,7 @@ internal class TestPage : BasePager() {
                                 println("failure: $it")
                             }.onSuccess<BaseData<List<BannerItem>>> {
                                 it?.let {
-                                    println(it.toJson(false))
+                                    toast("${it.data.firstOrNull()?.title}")
                                 } ?: run {
                                     println("解析失败")
                                 }
@@ -280,6 +280,7 @@ internal class TestPage : BasePager() {
                             }
                             val result = httpResponse.body<BaseData<List<BannerItem>>>()
                             println(result)
+                            toast("${result.data.firstOrNull()?.title}")
                         }
                     }
                 }

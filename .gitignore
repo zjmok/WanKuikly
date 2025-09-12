@@ -39,3 +39,5 @@ Kotlin-js-store
 *.pyc
 
 .kotlin
+
+!miniApp/dist/**/*.js

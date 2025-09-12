@@ -27,7 +27,7 @@ import org.example.wan.kuikly.page.square.SquareTree
 import org.example.wan.kuikly.utils.Back
 import org.example.wan.kuikly.utils.Fore
 
-@Page("router")
+@Page("main")
 internal class MainPage : BasePager() {
 
     private var pageListRef: ViewRef<PageListView<*, *>>? = null
