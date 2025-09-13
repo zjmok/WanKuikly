@@ -125,7 +125,7 @@ internal class SquareTreeView : ComposeView<SquareTreeViewAttr, SquareTreeViewEv
 
         val list = fromJson<List<DataX>>(dates.toString()) ?: return
 
-        tabList[index].articleList.addAll(list)
+        tabList[index].articleList += list
         tabList[index].isLoad = true
     }
 

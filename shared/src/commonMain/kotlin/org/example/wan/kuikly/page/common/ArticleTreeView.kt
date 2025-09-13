@@ -125,7 +125,7 @@ internal class ArticleTreeView : ComposeView<ArticleTreeViewAttr, ArticleTreeVie
         if (index >= tabList.size) {
             return
         }
-        log("加载数据 index=$index")
+        log("${moduleName} 列表加载 index=$index")
 
         val id = tabList[index].tabId
         var url = ""
@@ -156,7 +156,7 @@ internal class ArticleTreeView : ComposeView<ArticleTreeViewAttr, ArticleTreeVie
 
         }
 
-        log("url = $url")
+//        log("url = $url")
         networkModule.requestGet(url, param) { data, success, errorMsg, response ->
             if (success.not()) {
                 toast(errorMsg)
@@ -175,7 +175,7 @@ internal class ArticleTreeView : ComposeView<ArticleTreeViewAttr, ArticleTreeVie
         val list = fromJson<List<DataX>>(dates.toString()) ?: return
 //        println(list)
 
-        tabList[index].articleList.addAll(list)
+        tabList[index].articleList += list
         tabList[index].isLoad = true
     }
 

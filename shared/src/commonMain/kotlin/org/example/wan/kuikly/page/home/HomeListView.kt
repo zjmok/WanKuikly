@@ -58,7 +58,7 @@ internal class HomeListView : ComposeView<HomeListViewAttr, HomeListViewEvent>()
 //            println(list)
 
             tabItem.bannerList.clear()
-            tabItem.bannerList.addAll(list)
+            tabItem.bannerList += list
         }
     }
 
@@ -91,7 +91,7 @@ internal class HomeListView : ComposeView<HomeListViewAttr, HomeListViewEvent>()
         val list = fromJson<List<DataX>>(dates.toString()) ?: return
 //        println(list)
 
-        tabItem.articleList.addAll(list)
+        tabItem.articleList += list
         tabItem.isLoad = true
     }
 

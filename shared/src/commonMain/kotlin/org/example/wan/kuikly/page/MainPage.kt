@@ -40,14 +40,12 @@ internal class MainPage : BasePager() {
     override fun created() {
         super.created()
 
-        tabDataList.addAll(
-            listOf(
-                "首页" to "icon_home",
-                "项目" to "icon_project",
-                "广场" to "icon_square",
-                "订阅" to "icon_subscribe",
-                "我" to "icon_person"
-            )
+        tabDataList += listOf(
+            "首页" to "icon_home",
+            "项目" to "icon_project",
+            "广场" to "icon_square",
+            "订阅" to "icon_subscribe",
+            "我" to "icon_person"
         )
 
         // 宽高

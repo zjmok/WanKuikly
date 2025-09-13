@@ -76,8 +76,8 @@ internal class ArticleListView : ComposeView<ArticleListViewAttr, ArticleListVie
                     (tabItem.moduleName == "首页" || tabItem.moduleName == "推荐")
                             && tabItem.bannerList.isNotEmpty()
                 }) {
-                    println("ctx.tabItem.bannerList.size = ${tabItem.bannerList.size}")
-                    println("w / h = ${ctx.pagerData.pageViewWidth} / ${ctx.pagerData.pageViewWidth * 9 / 16}")
+//                    println("ctx.tabItem.bannerList.size = ${tabItem.bannerList.size}")
+//                    println("w / h = ${ctx.pagerData.pageViewWidth} / ${ctx.pagerData.pageViewWidth * 9 / 16}")
                     View {
                         attr {
                             val width = pagerData.pageViewWidth

@@ -142,7 +142,7 @@ internal class TestPage : BasePager() {
                                 val url = WanAPI.BASE_URL + WanAPI.BANNER_LIST
 
                                 // FormDataContent
-//                                KtorClient.use {
+//                                ktorClient.use {
 //                                    // submitForm
 //                                    it.submitForm(
 //                                        url = url,
@@ -154,7 +154,7 @@ internal class TestPage : BasePager() {
 //                                }
 
                                 // MultiPartFormDataContent
-//                                KtorClient.use {
+//                                ktorClient.use {
 //                                    // submitFormWithBinaryData
 //                                    it.submitFormWithBinaryData(
 //                                        url = url,
@@ -195,7 +195,7 @@ internal class TestPage : BasePager() {
 
                                 // 对象 + application/json，可传 json
                                 // 会自动转换为 TextContent 的 json 字符串
-//                                KtorClient.use {
+//                                ktorClient.use {
 //                                    it.post(url) {
 //                                        setBody(
 //                                            BaseData(

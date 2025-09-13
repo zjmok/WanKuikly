@@ -1,6 +1,7 @@
 package org.example.wan.kuikly.utils
 
 import com.tencent.kuikly.core.base.PagerScope
+import com.tencent.kuikly.core.coroutines.CoroutineScope
 import com.tencent.kuikly.core.module.CallbackFn
 import com.tencent.kuikly.core.module.Module
 import com.tencent.kuikly.core.module.NetworkModule
@@ -25,6 +26,8 @@ internal val PagerScope.networkModule get(): NetworkModule = acquireModule(Netwo
 internal fun PagerScope.setTimeout(delay: Int, callback: () -> Unit): String {
     return setTimeout(pagerId, delay, callback)
 }
+
+internal val PagerScope.lifecycleScope get(): CoroutineScope = getPager().lifecycleScope
 
 /**
  * eg.
