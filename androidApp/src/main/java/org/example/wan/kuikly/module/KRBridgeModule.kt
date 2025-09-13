@@ -141,6 +141,9 @@ class KRBridgeModule : KuiklyRenderBaseModule() {
         val ctx = context ?: return
         val paramJSON = JSONObject(params)
         val url = paramJSON.optString("url")
+
+        // todo
+
     }
 
     private fun closePage(params: String?) {
@@ -162,7 +165,7 @@ class KRBridgeModule : KuiklyRenderBaseModule() {
                 setPositiveButton("确定") { dialog, _ ->
                     dialog.dismiss()
                     callback?.invoke(JSONObject().apply {
-                        put("right", true)
+                        put("confirm", true)
                     })
                 }
             } else if (buttons.length() == 1) {
@@ -170,7 +173,7 @@ class KRBridgeModule : KuiklyRenderBaseModule() {
                 setPositiveButton(btn) { dialog, _ ->
                     dialog.dismiss()
                     callback?.invoke(JSONObject().apply {
-                        put("right", true)
+                        put("confirm", true)
                     })
                 }
             } else {
@@ -179,13 +182,13 @@ class KRBridgeModule : KuiklyRenderBaseModule() {
                 setNegativeButton(negativeBtn) { dialog, _ ->
                     dialog.dismiss()
                     callback?.invoke(JSONObject().apply {
-                        put("left", true)
+                        put("cancel", true)
                     })
                 }
                 setPositiveButton(positiveBtn) { dialog, _ ->
                     dialog.dismiss()
                     callback?.invoke(JSONObject().apply {
-                        put("right", true)
+                        put("confirm", true)
                     })
                 }
             }

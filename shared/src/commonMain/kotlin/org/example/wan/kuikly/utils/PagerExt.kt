@@ -3,10 +3,12 @@ package org.example.wan.kuikly.utils
 import com.tencent.kuikly.core.base.PagerScope
 import com.tencent.kuikly.core.coroutines.CoroutineScope
 import com.tencent.kuikly.core.module.CallbackFn
+import com.tencent.kuikly.core.module.CallbackRef
 import com.tencent.kuikly.core.module.Module
 import com.tencent.kuikly.core.module.NetworkModule
 import com.tencent.kuikly.core.module.NotifyModule
 import com.tencent.kuikly.core.module.RouterModule
+import com.tencent.kuikly.core.module.SharedPreferencesModule
 import com.tencent.kuikly.core.nvi.serialization.json.JSONObject
 import com.tencent.kuikly.core.timer.setTimeout
 import org.example.wan.kuikly.base.BridgeModule
@@ -23,6 +25,8 @@ internal val PagerScope.notifyModule get(): NotifyModule = acquireModule(NotifyM
 
 internal val PagerScope.networkModule get(): NetworkModule = acquireModule(NetworkModule.MODULE_NAME)
 
+internal val PagerScope.sharedPreferencesModule get(): SharedPreferencesModule = acquireModule(SharedPreferencesModule.MODULE_NAME)
+
 internal fun PagerScope.setTimeout(delay: Int, callback: () -> Unit): String {
     return setTimeout(pagerId, delay, callback)
 }
@@ -37,10 +41,16 @@ internal val PagerScope.lifecycleScope get(): CoroutineScope = getPager().lifecy
  * }
  * ```
  */
-fun PagerScope.postNotify(eventName: String, eventData: JSONObject.() -> Unit) {
-    notifyModule.postNotify(eventName, JSONObject().apply {
-        eventData()
-    })
+fun PagerScope.postNotify(eventName: String, jsonObject: JSONObject? = null, crossProcess: Boolean = false) {
+    notifyModule.postNotify(eventName, jsonObject ?: JSONObject(), crossProcess)
+}
+
+fun PagerScope.addNotify(eventName: String, crossProcess: Boolean = false, callback: CallbackFn): CallbackRef {
+    return notifyModule.addNotify(eventName, crossProcess, callback)
+}
+
+fun PagerScope.removeNotify(eventName: String, callbackRef: CallbackRef) {
+    notifyModule.removeNotify(eventName, callbackRef)
 }
 
 fun PagerScope.toast(message: String) {
@@ -51,7 +61,7 @@ fun PagerScope.log(message: String) {
     bridgeModule.log(message)
 }
 
-fun PagerScope.log(
+fun PagerScope.showAlert(
     title: String?,
     message: String?,
     leftBtnTitle: String?,

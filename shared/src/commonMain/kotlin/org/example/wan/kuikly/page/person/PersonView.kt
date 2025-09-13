@@ -9,18 +9,31 @@ import com.tencent.kuikly.core.base.ComposeView
 import com.tencent.kuikly.core.base.ViewBuilder
 import com.tencent.kuikly.core.base.ViewContainer
 import com.tencent.kuikly.core.base.attr.ImageUri
+import com.tencent.kuikly.core.module.CallbackRef
+import com.tencent.kuikly.core.reactive.handler.observable
 import com.tencent.kuikly.core.views.Image
 import com.tencent.kuikly.core.views.List
 import com.tencent.kuikly.core.views.Text
 import com.tencent.kuikly.core.views.View
 import com.tencent.kuikly.core.views.layout.Column
+import com.tencent.kuikly.core.views.layout.Row
 import org.example.wan.kuikly.RouterPage.Companion.LOGO
+import org.example.wan.kuikly.data.SuperUserInfo
 import org.example.wan.kuikly.utils.Background
 import org.example.wan.kuikly.utils.Fore
+import org.example.wan.kuikly.utils.PrimaryText
+import org.example.wan.kuikly.utils.SecondaryText
+import org.example.wan.kuikly.utils.addNotify
+import org.example.wan.kuikly.utils.fromJson
+import org.example.wan.kuikly.utils.removeNotify
 import org.example.wan.kuikly.utils.routerModule
-import org.example.wan.kuikly.utils.toast
+import org.example.wan.kuikly.utils.sharedPreferencesModule
 
 internal class PersonView : ComposeView<PersonViewAttr, PersonViewEvent>() {
+
+    private var superUserInfo by observable<SuperUserInfo?>(SuperUserInfo())
+
+    private lateinit var notiRef: CallbackRef
 
     override fun createEvent(): PersonViewEvent {
         return PersonViewEvent()
@@ -28,6 +41,23 @@ internal class PersonView : ComposeView<PersonViewAttr, PersonViewEvent>() {
 
     override fun createAttr(): PersonViewAttr {
         return PersonViewAttr()
+    }
+
+    override fun created() {
+        super.created()
+        notiRef = addNotify("superUserInfo") {
+            val superUserInfo = fromJson<SuperUserInfo>(it.toString())
+            this.superUserInfo = superUserInfo
+        }
+        val json = sharedPreferencesModule.getString("superUserInfo")
+        fromJson<SuperUserInfo>(json)?.let {
+            superUserInfo = it
+        }
+    }
+
+    override fun viewDestroyed() {
+        removeNotify("superUserInfo", notiRef)
+        super.viewDestroyed()
     }
 
     override fun body(): ViewBuilder {
@@ -71,12 +101,15 @@ internal class PersonView : ComposeView<PersonViewAttr, PersonViewEvent>() {
                             }
                             event {
                                 click {
-                                    toast("click")
+                                    if ((ctx.superUserInfo?.userInfo?.id ?: -1) <= 0) {
+                                        routerModule.openPage("login")
+                                    }
                                 }
                             }
                             Image {
                                 attr {
                                     size(80f, 80f)
+                                    // 边框 圆角
                                     borderRadius(40f)
                                     border(Border(1f, BorderStyle.DASHED, Color.Fore))
                                     resizeCover()
@@ -90,15 +123,37 @@ internal class PersonView : ComposeView<PersonViewAttr, PersonViewEvent>() {
                                 }
                                 Text {
                                     attr {
-                                        text("昵称昵称昵称")
+                                        text(ctx.superUserInfo?.userInfo?.nickname ?: "null")
                                         fontSize(20f)
+                                        color(Color.PrimaryText)
+                                    }
+                                }
+                                Row {
+                                    attr {
+                                        marginTop(8f)
+                                    }
+                                    Text {
+                                        attr {
+                                            text("用户名: ${ctx.superUserInfo?.userInfo?.username ?: "null"}")
+                                            fontSize(16f)
+                                            color(Color.SecondaryText)
+                                        }
+                                    }
+                                    Text {
+                                        attr {
+                                            marginLeft(20f)
+                                            text("ID: ${ctx.superUserInfo?.userInfo?.id ?: -1}")
+                                            fontSize(16f)
+                                            color(Color.SecondaryText)
+                                        }
                                     }
                                 }
                                 Text {
                                     attr {
                                         marginTop(8f)
-                                        text("ididid")
-                                        fontSize(18f)
+                                        text("邮箱: ${ctx.superUserInfo?.userInfo?.email ?: "null"}")
+                                        fontSize(16f)
+                                        color(Color.SecondaryText)
                                     }
                                 }
                             }
@@ -128,7 +183,7 @@ internal class PersonView : ComposeView<PersonViewAttr, PersonViewEvent>() {
                             }
                             event {
                                 click {
-                                    toast("click")
+                                    routerModule.openPage("register")
                                 }
                             }
                             Image {
@@ -141,7 +196,50 @@ internal class PersonView : ComposeView<PersonViewAttr, PersonViewEvent>() {
                                 attr {
                                     margin(left = 10f, right = 10f)
                                     flex(1f)
-                                    text("item")
+                                    text("RegisterPage")
+                                    fontSize(18f)
+                                }
+                            }
+                            Image {
+                                attr {
+                                    size(10f, 20f)
+                                    src(ImageUri.commonAssets("icon_arrow_right.png"))
+                                }
+                            }
+                        }
+                        // 分割线
+                        View {
+                            attr {
+                                height(1f)
+                                width(pagerData.pageViewWidth)
+//                                backgroundColor(Color.GRAY)
+                            }
+                        }
+                        // item
+                        View {
+                            attr {
+                                alignItemsCenter()
+                                flexDirectionRow()
+                                backgroundColor(Color.WHITE)
+                                minHeight(60f)
+                                padding(left = 10f, right = 10f)
+                            }
+                            event {
+                                click {
+                                    routerModule.openPage("login")
+                                }
+                            }
+                            Image {
+                                attr {
+                                    size(20f, 20f)
+                                    src(ImageUri.commonAssets("icon_home_selected.png"))
+                                }
+                            }
+                            Text {
+                                attr {
+                                    margin(left = 10f, right = 10f)
+                                    flex(1f)
+                                    text("LoginPage")
                                     fontSize(18f)
                                 }
                             }
@@ -184,7 +282,7 @@ internal class PersonView : ComposeView<PersonViewAttr, PersonViewEvent>() {
                                 attr {
                                     margin(left = 10f, right = 10f)
                                     flex(1f)
-                                    text("item")
+                                    text("TestVforPage")
                                     fontSize(18f)
                                 }
                             }

@@ -201,8 +201,9 @@ internal class MainPage : BasePager() {
                                 }
 
                                 "项目", "订阅", "公众号" -> {
-                                    ArticleTree(item.first) {
+                                    ArticleTree {
                                         attr {
+                                            moduleName = item.first
                                             width(pagerData.pageViewWidth)
                                             height(
                                                 pagerData.pageViewHeight

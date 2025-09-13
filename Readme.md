@@ -40,28 +40,35 @@ android
 
 todo，待完成
 
-- 登录，存储
 - 搜索页面
-- WebPager
-- 解决硬编码
-- 
+- 页面管理
+- pref 封装管理
+- 网络请求封装 统一处理
+- 架构分层
+- WebView 实现
 
 ---
 
 存在的问题
 
 - 使用 kotlinx-serialization 后 h5App 运行失败
-- html 解析
+- Ktor 网络请求后更新数据，大概率会报错，用回 networkModel
+- 很多地方 Kuikly 模板只提供接口，确认各个平台功能实现情况
+
+- Input 无法清除焦点光标
+- 关闭软键盘未实现
+- WebView 支持
+- html 解析，类似 Android 的 Html.fromHtml 那种
 - 多个容器高度设置 0.5f，显示不一致，多个分割线大小不一致，在模拟器上 1f 也大小不一致
 - ListPage 懒加载优化
 - Android API 未适配到最新版，最高支持 34
-- Ktor 网络请求后更新数据，大概率会报错，用回 networkModel
 
 ---
 
 写 Bug 心得
 
 - ComposeView，插件创建的类是通过 addChild 添加的，在构建对象时传递参数，view创建时会调用一次。可以先传一个引用，之后更新这个引用的数据
+- ComposeView，需要自己指定对齐方式，上级 View 的对齐方式可能不生效
 
 ---
 

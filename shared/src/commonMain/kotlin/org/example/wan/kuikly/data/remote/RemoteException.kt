@@ -3,10 +3,40 @@ package org.example.wan.kuikly.data.remote
 import com.tencent.kuikly.core.base.PagerScope
 import org.example.wan.kuikly.utils.toast
 
-class RemoteException(val statusCode: Int, cause: Throwable?) : Exception(cause) {
+class RemoteException : Exception {
+
+    val statusCode: Int
+
+    constructor(statusCode: Int, message: String) : this(statusCode, Throwable(message))
+
+    constructor(statusCode: Int, cause: Throwable? = null) : super(cause) {
+        this.statusCode = statusCode
+    }
+
+    // 重写返回最底层的 cause 的 message
+    override val message: String?
+        get() = getRootCauseMessage(cause)
+
+    /**
+     * 获取异常链中最底层的 cause 的 message
+     * @param throwable 原始异常
+     * @return 最底层异常的 message，如果最终 cause 为 null，则返回自身 message
+     */
+    private fun getRootCauseMessage(throwable: Throwable?): String? {
+        var cause: Throwable? = throwable
+        var rootCause: Throwable? = throwable
+        // 循环遍历，直到找到最底层的 cause (cause 为 null)
+        while (cause != null) {
+            rootCause = cause
+            cause = cause.cause
+        }
+        return rootCause?.message
+    }
+
     override fun toString(): String {
         return "RemoteException(statusCode=$statusCode, message=${message})"
     }
+
 }
 
 /**

@@ -21,7 +21,7 @@ sealed class NetworkResult {
      */
     data class Success(val result: Pair<NetworkResponse, JSONObject>) : NetworkResult()
 
-    data class Failure(val exception: Throwable) : NetworkResult()
+    data class Failure(val throwable: Throwable) : NetworkResult()
 
 }
 
@@ -44,6 +44,49 @@ inline val Pair<NetworkResponse, JSONObject>.result
     }
 
 fun NetworkResponse.isSuccess(): Boolean = statusCode in (200 until 300)
+
+/**
+ * @param headerAction response header 数据，解析失败时，回调参数为 null
+ * @param bodyAction response body 数据，解析失败时，回调参数为 null
+ */
+inline fun <reified T> NetworkResult.onSuccess(
+    noinline headerAction: ((Map<String, List<String>>) -> Unit)? = null,
+    bodyAction: (data: T?) -> Unit,
+): NetworkResult {
+    if (this is NetworkResult.Success) {
+        if (this.result.first.isSuccess()) {
+            if (parseWrapped) {
+                // 需要处理 errorCode
+                runCatching {
+                    val dataJson = this.result.second.toString()
+                    json.decodeFromString<BaseData<T>>(dataJson)
+                }.onFailure {
+                    bodyAction(null)
+                }.onSuccess {
+                    if (it.errorCode == 0) {
+                        headerAction?.let {
+                            val headersJson = this.result.first.headerFields.toString()
+                            val headerMap = json.decodeFromString<Map<String, List<String>>>(headersJson)
+                            headerAction.invoke(headerMap)
+                        }
+
+                        bodyAction(it.data)
+                    }
+                    // errorCode != 0 onFailure
+                }
+            } else {
+                runCatching {
+                    json.decodeFromString<T>(this.result.toString())
+                }.onFailure {
+                    bodyAction(null)
+                }.onSuccess {
+                    bodyAction(it)
+                }
+            }
+        }
+    }
+    return this
+}
 
 /**
  * @param action 解析失败时，回调参数为 null
@@ -82,24 +125,27 @@ inline fun <reified T> NetworkResult.onSuccess(action: (value: T?) -> Unit): Net
  */
 inline fun NetworkResult.onFailure(action: (exception: RemoteException) -> Unit): NetworkResult {
     if (this is NetworkResult.Failure) {
-        val exception = RemoteException(-999, this.exception)
+        val exception = RemoteException(-999, this.throwable)
         action(exception)
     } else {
         if (this is NetworkResult.Success) {
+            // tag = KRNetworkModule, log =
+            // Network module error: javax.net.ssl.SSLHandshakeException: Handshake failed
+            // Kuikly 处理成成功返回 statusCode = -1000
             if (this.result.first.isSuccess().not()) {
                 val statusCode = this.result.first.statusCode ?: -998
-                val exception = RuntimeException("HTTP error with status code: $statusCode")
-                val ktorException = RemoteException(statusCode, exception)
+                val message = "HTTP error with status code: $statusCode"
+                val ktorException = RemoteException(statusCode, message)
                 action(ktorException)
             } else {
                 if (parseWrapped) {
                     // 需要处理 errorCode
                     val errorCode = this.result.second.optInt("errorCode")
-                    val errorMsg = this.result.second.optString("errorMsg")
                     // 解析数据，若 errorCode != 0 代表业务失败，则返回 BizException
                     if (errorCode != 0) {
-                        val exception = RuntimeException("服务器返回: errorCode = $errorCode, errorMsg = $errorMsg")
-                        val bizException = RemoteException(errorCode, exception)
+                        // 服务器返回: errorCode = $errorCode, errorMsg = $errorMsg
+                        val errorMsg = this.result.second.optString("errorMsg")
+                        val bizException = RemoteException(errorCode, errorMsg)
                         action(bizException)
                     }
                     // errorCode == 0 onSuccess

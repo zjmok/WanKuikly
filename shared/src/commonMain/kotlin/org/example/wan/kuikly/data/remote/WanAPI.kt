@@ -26,4 +26,16 @@ object WanAPI {
         // 在某个公众号中搜索历史文章, page >= 1
         const val WX_LIST = "/wxarticle/list/{id}/{page}/json"
 
+        // post username password repassword
+        const val REGISTER = "/user/register"
+
+        // post username password
+        const val LOGIN = "/user/login"
+
+        // get
+        const val LOGOUT = "/user/logout/json"
+
+        // get
+        const val USERINFO = "/user/lg/userinfo/json"
+
 }

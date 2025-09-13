@@ -58,13 +58,6 @@ internal class TreeTabItem {
 
 internal class ArticleTreeView : ComposeView<ArticleTreeViewAttr, ArticleTreeViewEvent>() {
 
-    // 模块名称, 首页 项目 ...
-    private var moduleName: String = ""
-
-    fun setModuleName(moduleName: String) {
-        this.moduleName = moduleName
-    }
-
     private var pageListRef: ViewRef<PageListView<*, *>>? = null
     private var scrollParams: ScrollParams? by observable(null)
 
@@ -87,7 +80,7 @@ internal class ArticleTreeView : ComposeView<ArticleTreeViewAttr, ArticleTreeVie
 //        KuiklyContextScheduler.runOnKuiklyThread("") { }
 
         var url = ""
-        when (moduleName) {
+        when (attr.moduleName) {
             "项目" -> {
                 url = BASE_URL + PROJECT_TREE
             }
@@ -116,7 +109,7 @@ internal class ArticleTreeView : ComposeView<ArticleTreeViewAttr, ArticleTreeVie
                         TreeTabItem().apply {
                             tabId = "${it.id}"
                             tabTitle = it.nameDecoded
-                            moduleName = this@ArticleTreeView.moduleName
+                            moduleName = attr.moduleName
                         }
                     }.let {
                         tabList.clear()
@@ -139,12 +132,12 @@ internal class ArticleTreeView : ComposeView<ArticleTreeViewAttr, ArticleTreeVie
         if (tabIndex >= tabList.size) {
             return
         }
-        log("$moduleName ${tabList[tabIndex].tabTitle} 列表加载 tabIndex = $tabIndex")
+        log("${attr.moduleName} ${tabList[tabIndex].tabTitle} 列表加载 tabIndex = $tabIndex")
 
         var url = ""
         val param = JSONObject()
 
-        when (moduleName) {
+        when (attr.moduleName) {
             "项目" -> {
                 tabList[tabIndex].articlePage = 1
                 url = BASE_URL + PROJECT_LIST.run {
@@ -343,14 +336,15 @@ internal class ArticleTreeView : ComposeView<ArticleTreeViewAttr, ArticleTreeVie
 
 internal class ArticleTreeViewAttr : ComposeAttr() {
 
+    // 模块名称, 首页 项目 ...
+    var moduleName: String = ""
+
 }
 
 internal class ArticleTreeViewEvent : ComposeEvent() {
 
 }
 
-internal fun ViewContainer<*, *>.ArticleTree(moduleName: String, init: ArticleTreeView.() -> Unit) {
-    addChild(ArticleTreeView().apply {
-        setModuleName(moduleName)
-    }, init)
+internal fun ViewContainer<*, *>.ArticleTree(init: ArticleTreeView.() -> Unit) {
+    addChild(ArticleTreeView(), init)
 }

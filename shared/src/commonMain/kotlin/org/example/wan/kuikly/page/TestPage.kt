@@ -11,6 +11,7 @@ import com.tencent.kuikly.core.coroutines.launch
 import com.tencent.kuikly.core.reactive.handler.observable
 import com.tencent.kuikly.core.views.ActionButtonTitleAttr
 import com.tencent.kuikly.core.views.AlertDialog
+import com.tencent.kuikly.core.views.List
 import com.tencent.kuikly.core.views.Text
 import com.tencent.kuikly.core.views.View
 import io.ktor.client.HttpClient
@@ -43,11 +44,11 @@ import org.example.wan.kuikly.data.remote.onFailure
 import org.example.wan.kuikly.data.remote.onSuccess
 import org.example.wan.kuikly.data.remote.runCatchingKtor
 import org.example.wan.kuikly.kmp.getEngine
+import org.example.wan.kuikly.page.common.NavBar
 import org.example.wan.kuikly.utils.Back
 import org.example.wan.kuikly.utils.Background
 import org.example.wan.kuikly.utils.Fore
 import org.example.wan.kuikly.utils.bridgeModule
-import org.example.wan.kuikly.utils.toJson
 import org.example.wan.kuikly.utils.toast
 
 @Page("test")
@@ -59,8 +60,9 @@ internal class TestPage : BasePager() {
         val ctx = this
         return {
             attr {
-                allCenter()
                 flexDirectionColumn()
+                justifyContentFlexStart()
+                alignItemsCenter()
                 backgroundColor(Color.Background)
             }
             AlertDialog {
@@ -108,252 +110,241 @@ internal class TestPage : BasePager() {
                     }
                 }
             }
-            Text {
+            // NavBar
+            NavBar {
                 attr {
-                    text("测试页面")
-                }
-            }
-            TestItem {
-                attr {
-                    marginTop(10f)
-                    text("callPhone")
+                    title = "测试页面"
+//                        paddingStatusBar = true // 默认 true
                 }
                 event {
-                    click {
-                        bridgeModule.callPhone("10086")
+                    backClick {
+                        bridgeModule.closePage()
                     }
                 }
             }
-            TestItem {
+            List {
                 attr {
-                    marginTop(10f)
-                    text("catch")
+                    flex(1f)
+                    width(pagerData.pageViewWidth)
+                    alignSelfCenter()
+                    flexDirectionColumn()
+                    justifyContentFlexStart()
+                    alignItemsCenter() // 可能不生效，可能需要 item 内部指定
                 }
-                event {
-                    click {
-                        runCatching {
-                            throw RuntimeException("test catch")
-                        }.onFailure {
-
-                        }.onSuccess {
-
-                        }
+                TestItem {
+                    attr {
+                        marginTop(10f)
+                        text("Ktor Client 封装 post")
                     }
-                }
-            }
-            TestItem {
-                attr {
-                    marginTop(10f)
-                    text("Ktor Client 封装 post")
-                }
-                event {
-                    click {
-                        getPager().lifecycleScope.launch {
-                            runCatchingKtor {
-                                val url = WanAPI.BASE_URL + WanAPI.BANNER_LIST
+                    event {
+                        click {
+                            getPager().lifecycleScope.launch {
+                                runCatchingKtor {
+                                    val url = WanAPI.BASE_URL + WanAPI.BANNER_LIST
 
-                                // FormDataContent
-//                                ktorClient.use {
-//                                    // submitForm
-//                                    it.submitForm(
-//                                        url = url,
-//                                        formParameters = parameters {
-//                                            append("key1", "value1")
-//                                            append("key2", "value2")
-//                                        },
-//                                    )
-//                                }
-
-                                // MultiPartFormDataContent
-//                                ktorClient.use {
-//                                    // submitFormWithBinaryData
-//                                    it.submitFormWithBinaryData(
-//                                        url = url,
-//                                        formData = formData {
-//                                            append("key1", "value1")
-//                                            append("key2", "value2")
-//                                        },
-//                                    )
-//                                }
-
-                                // post json body 可用 post 或 submitForm
-                                // 表单文件上传用 submitForm submitFormWithBinaryData
-                                ktorClient.use {
-                                    it.post(url) {
-                                        // setBody 可传 Text、对象、FormDataContent、MultiPartFormDataContent
-                                        setBody(
-                                            // setBody 可传 FormDataContent
-                                            FormDataContent(
-                                                ParametersBuilder()
-                                                    .apply {
-                                                        set("key1", "value1")
-                                                        append("key2", "value2")
-                                                    }
-                                                    .build()
-                                            )
-                                            // setBody 可传 MultiPartFormDataContent
-//                                            MultiPartFormDataContent(
-//                                                formData {
-//                                                    append(FormPart("key1", "value1"))
-//                                                    append("key2", "value2")
-//                                                },
-//                                                boundary = "WebAppBoundary"
-//                                            )
-                                        )
-                                        header("Authorization", "Bearer your_token_here")
-                                    }
-                                }
-
-                                // 对象 + application/json，可传 json
-                                // 会自动转换为 TextContent 的 json 字符串
-//                                ktorClient.use {
-//                                    it.post(url) {
-//                                        setBody(
-//                                            BaseData(
-//                                                errorCode = 1,
-//                                                errorMsg = "msg",
-//                                                data = "data",
-//                                            )
+                                    // FormDataContent
+//                                    ktorClient.use {
+//                                        // submitForm
+//                                        it.submitForm(
+//                                            url = url,
+//                                            formParameters = parameters {
+//                                                append("key1", "value1")
+//                                                append("key2", "value2")
+//                                            },
 //                                        )
-//                                        contentType(ContentType.parse("application/json"))
 //                                    }
-//                                }
 
-                            }.onFailure {
-                                // 异常 + code 不在 [200, 300) 范围内
-                                println("failure: $it")
-                            }.onSuccess<List<BannerItem>> {
-                                it?.let {
-//                                    println(it)
-                                    toast("${it.firstOrNull()?.title}")
-                                } ?: run {
-                                    println("解析失败")
-                                }
-                            }
+                                    // MultiPartFormDataContent
+//                                    ktorClient.use {
+//                                        // submitFormWithBinaryData
+//                                        it.submitFormWithBinaryData(
+//                                            url = url,
+//                                            formData = formData {
+//                                                append("key1", "value1")
+//                                                append("key2", "value2")
+//                                            },
+//                                        )
+//                                    }
 
-                        }
-                    }
-                }
-            }
-            TestItem {
-                attr {
-                    marginTop(10f)
-                    text("Ktor Client 封装 get")
-                }
-                event {
-                    click {
-                        getPager().lifecycleScope.launch {
-                            runCatchingKtor {
-                                val url = WanAPI.BASE_URL + WanAPI.BANNER_LIST
-                                ktorClient.use {
-                                    it.get(url) {
-                                        header("Authorization", "Bearer your_token_here") // 认证头示例
-                                        header("Accept", "application/json") // 指定期望的响应内容类型
-                                        header("Custom-Header", "CustomValue") // 自定义头
+                                    // post json body 可用 post 或 submitForm
+                                    // 表单文件上传用 submitForm submitFormWithBinaryData
+                                    ktorClient.use {
+                                        it.post(url) {
+                                            // setBody 可传 Text、对象、FormDataContent、MultiPartFormDataContent
+                                            setBody(
+                                                // setBody 可传 FormDataContent
+                                                FormDataContent(
+                                                    ParametersBuilder()
+                                                        .apply {
+                                                            set("key1", "value1")
+                                                            append("key2", "value2")
+                                                        }
+                                                        .build()
+                                                )
+                                                // setBody 可传 MultiPartFormDataContent
+//                                                MultiPartFormDataContent(
+//                                                    formData {
+//                                                        append(FormPart("key1", "value1"))
+//                                                        append("key2", "value2")
+//                                                    },
+//                                                    boundary = "WebAppBoundary"
+//                                                )
+                                            )
+                                            header("Authorization", "Bearer your_token_here")
+                                        }
+                                    }
+
+                                    // 对象 + application/json，可传 json
+                                    // 会自动转换为 TextContent 的 json 字符串
+//                                    ktorClient.use {
+//                                        it.post(url) {
+//                                            setBody(
+//                                                BaseData(
+//                                                    errorCode = 1,
+//                                                    errorMsg = "msg",
+//                                                    data = "data",
+//                                                )
+//                                            )
+//                                            contentType(ContentType.parse("application/json"))
+//                                        }
+//                                    }
+
+                                }.onFailure {
+                                    // 异常 + code 不在 [200, 300) 范围内
+                                    println("failure: $it")
+                                }.onSuccess<List<BannerItem>> {
+                                    it?.let {
+//                                        println(it)
+                                        toast("${it.firstOrNull()?.title}")
+                                    } ?: run {
+                                        println("解析失败")
                                     }
                                 }
-                            }.onFailure {
-                                // 异常 + code 不在 [200, 300) 范围内
-                                println("failure: $it")
-                            }.onSuccess<List<BannerItem>> {
-                                it?.let {
-                                    toast("${it.firstOrNull()?.title}")
-                                } ?: run {
-                                    println("解析失败")
-                                }
-                            }
 
+                            }
                         }
                     }
                 }
-            }
-            TestItem {
-                attr {
-                    marginTop(10f)
-                    text("Ktor Client 直接使用")
-                }
-                event {
-                    click {
-                        // 直接使用 Ktor Client
-                        getPager().lifecycleScope.launch {
-                            val engine = getEngine() // KMP 获取
-                            val client = HttpClient(engine) {
-                                install(ContentNegotiation) {
-                                    json()
+                TestItem {
+                    attr {
+                        marginTop(10f)
+                        text("Ktor Client 封装 get")
+                    }
+                    event {
+                        click {
+                            getPager().lifecycleScope.launch {
+                                runCatchingKtor {
+                                    val url = WanAPI.BASE_URL + WanAPI.BANNER_LIST
+                                    ktorClient.use {
+                                        it.get(url) {
+                                            header("Authorization", "Bearer your_token_here") // 认证头示例
+                                            header("Accept", "application/json") // 指定期望的响应内容类型
+                                            header("Custom-Header", "CustomValue") // 自定义头
+                                        }
+                                    }
+                                }.onFailure {
+                                    // 异常 + code 不在 [200, 300) 范围内
+                                    println("failure: $it")
+                                }.onSuccess<List<BannerItem>> {
+                                    it?.let {
+                                        toast("${it.firstOrNull()?.title}")
+                                    } ?: run {
+                                        println("解析失败")
+                                    }
                                 }
+
                             }
-                            val url = WanAPI.BASE_URL + WanAPI.BANNER_LIST
-                            val httpResponse = client.get(url) {
-                                // 添加请求头
-                                header("Authorization", "Bearer your_token_here") // 认证头示例
-                                header("Accept", "application/json") // 指定期望的响应内容类型
-                                header("Custom-Header", "CustomValue") // 自定义头
+                        }
+                    }
+                }
+                TestItem {
+                    attr {
+                        marginTop(10f)
+                        text("Ktor Client 直接使用")
+                    }
+                    event {
+                        click {
+                            // 直接使用 Ktor Client
+                            getPager().lifecycleScope.launch {
+                                val engine = getEngine() // KMP 获取
+                                val client = HttpClient(engine) {
+                                    install(ContentNegotiation) {
+                                        json()
+                                    }
+                                }
+                                val url = WanAPI.BASE_URL + WanAPI.BANNER_LIST
+                                val httpResponse = client.get(url) {
+                                    // 添加请求头
+                                    header("Authorization", "Bearer your_token_here") // 认证头示例
+                                    header("Accept", "application/json") // 指定期望的响应内容类型
+                                    header("Custom-Header", "CustomValue") // 自定义头
+                                }
+                                val result = httpResponse.body<BaseData<List<BannerItem>>>()
+                                println(result)
+                                toast("${result.data.firstOrNull()?.title}")
                             }
-                            val result = httpResponse.body<BaseData<List<BannerItem>>>()
-                            println(result)
-                            toast("${result.data.firstOrNull()?.title}")
                         }
                     }
                 }
-            }
-            TestItem {
-                attr {
-                    marginTop(10f)
-                    text("Kuikly 内建协程")
-                }
-                event {
-                    click {
-                        // 内建协程目前仅支持基础的 suspend 方法执行能力
-                        getPager().lifecycleScope.launch {
-                            ctx.suspendFun()
+                TestItem {
+                    attr {
+                        marginTop(10f)
+                        text("Kuikly 内建协程")
+                    }
+                    event {
+                        click {
+                            // 内建协程目前仅支持基础的 suspend 方法执行能力
+                            getPager().lifecycleScope.launch {
+                                ctx.suspendFun()
+                            }
                         }
                     }
                 }
-            }
-            TestItem {
-                attr {
-                    marginTop(10f)
-                    text("Kuikly alert")
-                }
-                event {
-                    click {
-                        ctx.showAlert = true
+                TestItem {
+                    attr {
+                        marginTop(10f)
+                        text("Kuikly alert")
                     }
-                }
-            }
-            TestItem {
-                attr {
-                    marginTop(10f)
-                    text("Native alert")
-                }
-                event {
-                    click {
-                        bridgeModule.showAlert("title", "这是一个 alert 测试", "取消", "确定") { jsonObject ->
-                            toast("alert 回调：$jsonObject")
+                    event {
+                        click {
+                            ctx.showAlert = true
                         }
                     }
                 }
-            }
-            TestItem {
-                attr {
-                    marginTop(10f)
-                    text("Native toast")
-                }
-                event {
-                    click {
-                        toast("点击了")
+                TestItem {
+                    attr {
+                        marginTop(10f)
+                        text("Native alert")
+                    }
+                    event {
+                        click {
+                            bridgeModule.showAlert("title", "这是一个 alert 测试", "取消", "确定") { jsonObject ->
+                                toast("alert 回调：$jsonObject")
+                            }
+                        }
                     }
                 }
-            }
-            TestItem {
-                attr {
-                    marginTop(10f)
-                    text("Native log")
+                TestItem {
+                    attr {
+                        marginTop(10f)
+                        text("Native toast")
+                    }
+                    event {
+                        click {
+                            toast("点击了")
+                        }
+                    }
                 }
-                event {
-                    click {
-                        val logModule = ctx.acquireModule<LogModule>(LogModule.MODULE_NAME)
-                        logModule.log("测试 message", "e", "KuiklyLog")
+                TestItem {
+                    attr {
+                        marginTop(10f)
+                        text("Native log")
+                    }
+                    event {
+                        click {
+                            val logModule = ctx.acquireModule<LogModule>(LogModule.MODULE_NAME)
+                            logModule.log("测试 message", "e", "KuiklyLog")
+                        }
                     }
                 }
             }
@@ -373,6 +364,9 @@ class ItemView : ComposeView<ItemViewAttr, ComposeEvent>() {
 
     override fun body(): ViewBuilder {
         return {
+            attr {
+                allCenter()
+            }
             View {
                 attr {
                     allCenter()

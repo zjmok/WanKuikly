@@ -34,6 +34,7 @@ import org.example.wan.kuikly.data.Articles
 import org.example.wan.kuikly.data.remote.WanAPI.BASE_URL
 import org.example.wan.kuikly.data.remote.WanAPI.HOME_LIST
 import org.example.wan.kuikly.data.remote.WanAPI.PROJECT_LIST
+import org.example.wan.kuikly.data.remote.WanAPI.QA_LIST
 import org.example.wan.kuikly.data.remote.WanAPI.SQUARE_LIST
 import org.example.wan.kuikly.data.remote.WanAPI.WX_LIST
 import org.example.wan.kuikly.data.remote.biz
@@ -46,6 +47,7 @@ import org.example.wan.kuikly.utils.Fore
 import org.example.wan.kuikly.utils.Foreground
 import org.example.wan.kuikly.utils.PrimaryText
 import org.example.wan.kuikly.utils.SecondaryText
+import org.example.wan.kuikly.utils.ifNotNull
 import org.example.wan.kuikly.utils.isNotNullAndNotBlank
 import org.example.wan.kuikly.utils.networkModule
 import org.example.wan.kuikly.utils.toast
@@ -416,7 +418,7 @@ internal class ArticleListView : ComposeView<ArticleListViewAttr, ArticleListVie
 
                 }
 
-                vif({ctx.attr.tabItem.articleList.isNotEmpty()}) {
+                vif({ ctx.attr.tabItem.articleList.isNotEmpty() }) {
                     View {
                         attr {
                             absolutePosition(right = 20f, bottom = 50f)
@@ -467,12 +469,34 @@ internal class ArticleListView : ComposeView<ArticleListViewAttr, ArticleListVie
             }
 
             "广场" -> {
-                attr.tabItem.articlePage = if (isLoadMore) attr.tabItem.articlePage + 1 else 0
-                url = BASE_URL + SQUARE_LIST.run {
-                    this.replace("{page}", "${attr.tabItem.articlePage}")
-                }
-                param.apply {
-                    put("page_size", "10")
+                when (attr.tabItem.tabTitle) {
+                    "搜索" -> {
+                        toast("开发中")
+                        // 未实现
+                        refreshRef.view?.endRefresh()
+                        return
+                    }
+
+                    "广场" -> {
+                        attr.tabItem.articlePage = if (isLoadMore) attr.tabItem.articlePage + 1 else 0
+                        url = BASE_URL + SQUARE_LIST.run {
+                            this.replace("{page}", "${attr.tabItem.articlePage}")
+                        }
+                        param.apply {
+                            put("page_size", "10")
+                        }
+                    }
+
+                    "问答" -> {
+                        attr.tabItem.articlePage = if (isLoadMore) attr.tabItem.articlePage + 1 else 1
+                        url = BASE_URL + QA_LIST.run {
+                            this.replace("{page}", "${attr.tabItem.articlePage}")
+                        }
+                        param.apply {
+                            // 接口 bug, 传了 page_size 返回列表没有置顶数据, 不传是正常的
+//                            put("page_size", "10")
+                        }
+                    }
                 }
             }
 
@@ -496,7 +520,7 @@ internal class ArticleListView : ComposeView<ArticleListViewAttr, ArticleListVie
                 refreshRef.view?.endRefresh()
                 footerRefreshRef.view?.resetRefreshState()
             }.onSuccess<Articles> {
-                it?.let {
+                it.ifNotNull {
                     if (isLoadMore.not()) {
                         // refresh
                         attr.tabItem.articleList.clear()
@@ -534,8 +558,6 @@ internal class ArticleListViewEvent : ComposeEvent() {
 
 }
 
-internal fun ViewContainer<*, *>.ArticleList(
-    init: ArticleListView.() -> Unit
-) {
+internal fun ViewContainer<*, *>.ArticleList(init: ArticleListView.() -> Unit) {
     addChild(ArticleListView(), init)
 }

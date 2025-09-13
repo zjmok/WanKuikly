@@ -11,6 +11,8 @@ import com.tencent.kuikly.core.reactive.handler.observableList
 import com.tencent.kuikly.core.views.List
 import com.tencent.kuikly.core.views.Text
 import com.tencent.kuikly.core.views.View
+import org.example.wan.kuikly.page.common.NavBar
+import org.example.wan.kuikly.utils.bridgeModule
 
 @Page("TestVfor")
 internal class TestVforPage : BasePager() {
@@ -31,6 +33,18 @@ internal class TestVforPage : BasePager() {
 
         return {
             View {
+                // NavBar
+                NavBar {
+                    attr {
+                        title = "测试页面"
+//                        paddingStatusBar = true // 默认 true
+                    }
+                    event {
+                        backClick {
+                            bridgeModule.closePage()
+                        }
+                    }
+                }
                 List {
                     attr {
                         allCenter()

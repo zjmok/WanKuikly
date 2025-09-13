@@ -111,9 +111,9 @@ internal class SquareTreeView : ComposeView<SquareTreeViewAttr, SquareTreeViewEv
             }
 
             "问答" -> {
-                var page = 0
+                tabList[tabIndex].articlePage = 1
                 url = BASE_URL + QA_LIST.run {
-                    this.replace("{page}", "$page")
+                    this.replace("{page}", "${tabList[tabIndex].articlePage}")
                 }
                 param.apply {
                     // 接口 bug, 传了 page_size 返回列表没有置顶数据, 不传是正常的

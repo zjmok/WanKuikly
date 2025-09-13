@@ -39,7 +39,7 @@ sealed class KtorResult {
 
     data class Success(val response: HttpResponse) : KtorResult()
 
-    data class Failure(val exception: Throwable) : KtorResult()
+    data class Failure(val throwable: Throwable) : KtorResult()
 
 }
 
@@ -100,24 +100,25 @@ suspend inline fun <reified T> KtorResult.onSuccess(action: (value: T?) -> Unit)
  */
 suspend inline fun KtorResult.onFailure(action: (exception: RemoteException) -> Unit): KtorResult {
     if (this is KtorResult.Failure) {
-        val exception = RemoteException(-999, this.exception)
+        val exception = RemoteException(-999, this.throwable)
         action(exception)
     } else {
         if (this is KtorResult.Success) {
             if (this.response.status.isSuccess().not()) {
                 val statusCode = this.response.status.value
-                val exception = RuntimeException("HTTP error with status code: $statusCode")
-                val ktorException = RemoteException(statusCode, exception)
+                val errorMsg = "HTTP error with status code: $statusCode"
+                val ktorException = RemoteException(statusCode, errorMsg)
                 action(ktorException)
             } else {
                 if (parseWrapped) {
                     // 需要处理 errorCode
-                    val errorCode = this.response.body<BaseData<String>>().errorCode
-                    val errorMsg = this.response.body<BaseData<String>>().errorMsg
+                    val baseData = this.response.body<BaseData<String>>()
                     // 解析数据，若 errorCode != 0 代表业务失败，则返回 BizException
+                    val errorCode = baseData.errorCode
                     if (errorCode != 0) {
-                        val exception = RuntimeException("服务器返回: errorCode = $errorCode, errorMsg = $errorMsg")
-                        val bizException = RemoteException(errorCode, exception)
+                        // 服务器返回: errorCode = $errorCode, errorMsg = $errorMsg
+                        val errorMsg = baseData.errorMsg
+                        val bizException = RemoteException(errorCode, errorMsg)
                         action(bizException)
                     }
                     // errorCode == 0 onSuccess
