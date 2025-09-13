@@ -116,6 +116,17 @@ internal class TestPage : BasePager() {
             TestItem {
                 attr {
                     marginTop(10f)
+                    text("callPhone")
+                }
+                event {
+                    click {
+                        bridgeModule.callPhone("10086")
+                    }
+                }
+            }
+            TestItem {
+                attr {
+                    marginTop(10f)
                     text("catch")
                 }
                 event {
@@ -211,10 +222,10 @@ internal class TestPage : BasePager() {
                             }.onFailure {
                                 // 异常 + code 不在 [200, 300) 范围内
                                 println("failure: $it")
-                            }.onSuccess<BaseData<List<BannerItem>>> {
+                            }.onSuccess<List<BannerItem>> {
                                 it?.let {
 //                                    println(it)
-                                    toast("${it.data.firstOrNull()?.title}")
+                                    toast("${it.firstOrNull()?.title}")
                                 } ?: run {
                                     println("解析失败")
                                 }
@@ -244,9 +255,9 @@ internal class TestPage : BasePager() {
                             }.onFailure {
                                 // 异常 + code 不在 [200, 300) 范围内
                                 println("failure: $it")
-                            }.onSuccess<BaseData<List<BannerItem>>> {
+                            }.onSuccess<List<BannerItem>> {
                                 it?.let {
-                                    toast("${it.data.firstOrNull()?.title}")
+                                    toast("${it.firstOrNull()?.title}")
                                 } ?: run {
                                     println("解析失败")
                                 }

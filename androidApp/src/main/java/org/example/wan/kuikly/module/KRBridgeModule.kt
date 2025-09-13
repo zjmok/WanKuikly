@@ -43,6 +43,10 @@ class KRBridgeModule : KuiklyRenderBaseModule() {
                 toast(params)
             }
 
+            "currentThread" -> {
+                return currentThread(callback)
+            }
+
             "log" -> {
                 log(params)
             }
@@ -105,6 +109,18 @@ class KRBridgeModule : KuiklyRenderBaseModule() {
             text = message.toString()
             interceptor = ToastLogInterceptor(-1)
         })
+    }
+
+    private fun currentThread(callback: KuiklyRenderCallback?):Any {
+        val currentThread = Thread.currentThread().name
+        // 异步回调结果
+        callback?.invoke(JSONObject().apply {
+            put("currentThread", currentThread)
+        })
+        // 同步返回结果
+        return JSONObject().apply {
+            put("currentThread", currentThread)
+        }
     }
 
     private fun copyToPasteboard(params: String?) {

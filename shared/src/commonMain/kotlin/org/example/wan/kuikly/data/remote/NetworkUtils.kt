@@ -1,34 +1,11 @@
 package org.example.wan.kuikly.data.remote
 
-import com.tencent.kuikly.core.coroutines.CoroutineScope
-import io.ktor.client.HttpClient
-import io.ktor.client.call.body
-import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
-import io.ktor.client.statement.HttpResponse
-import io.ktor.http.isSuccess
-import io.ktor.serialization.kotlinx.json.json
+import com.tencent.kuikly.core.module.NetworkResponse
+import com.tencent.kuikly.core.nvi.serialization.json.JSONObject
 import org.example.wan.kuikly.data.BaseData
-import org.example.wan.kuikly.kmp.getEngine
+import org.example.wan.kuikly.utils.json
 
-val ktorClient
-    get(): HttpClient {
-        // 通过 KMP 的 expect/actual 获取适配各平台的 HttpClient 引擎
-        val engine = getEngine()
-        val client = HttpClient(engine) {
-            engine {
-                // 引擎配置...
-            }
-            // 序列化
-            install(ContentNegotiation) {
-                json()
-            }
-            // logger
-            install(KtorLoggerInterceptor)
-        }
-        return client
-    }
-
-sealed class KtorResult {
+sealed class NetworkResult {
 
     /**
      * 在 onSuccess 和 onFailure 的行为，默认 true
@@ -37,42 +14,47 @@ sealed class KtorResult {
      */
     var parseWrapped = true
 
-    data class Success(val response: HttpResponse) : KtorResult()
+    /**
+     * @param result `Pair` 类型
+     * - `first` NetworkResponse 包含响应状态（但它没有数据）
+     * - `second` JSONObject 响应数据
+     */
+    data class Success(val result: Pair<NetworkResponse, JSONObject>) : NetworkResult()
 
-    data class Failure(val exception: Throwable) : KtorResult()
+    data class Failure(val exception: Throwable) : NetworkResult()
 
 }
 
-inline fun <T : CoroutineScope> T.runCatchingKtor(block: T.() -> HttpResponse): KtorResult {
+// networkModule 不需要 catch，跟 Ktor 不一样
+inline fun runResponseData(block: () -> Pair<NetworkResponse, JSONObject>): NetworkResult {
     return try {
-        KtorResult.Success(block())
+        NetworkResult.Success(block())
     } catch (e: Throwable) {
-        KtorResult.Failure(e)
+        NetworkResult.Failure(e)
     }
 }
 
-/**
- * code 在 [200, 300) 范围内
- */
-inline fun KtorResult.onSuccess(action: (value: HttpResponse) -> Unit): KtorResult {
-    if (this is KtorResult.Success) {
-        if (this.response.status.isSuccess()) {
-            action(this.response)
+inline val Pair<NetworkResponse, JSONObject>.result
+    get(): NetworkResult {
+        return try {
+            NetworkResult.Success(this)
+        } catch (e: Throwable) {
+            NetworkResult.Failure(e)
         }
     }
-    return this
-}
+
+fun NetworkResponse.isSuccess(): Boolean = statusCode in (200 until 300)
 
 /**
  * @param action 解析失败时，回调参数为 null
  */
-suspend inline fun <reified T> KtorResult.onSuccess(action: (value: T?) -> Unit): KtorResult {
-    if (this is KtorResult.Success) {
-        if (this.response.status.isSuccess()) {
+inline fun <reified T> NetworkResult.onSuccess(action: (value: T?) -> Unit): NetworkResult {
+    if (this is NetworkResult.Success) {
+        if (this.result.first.isSuccess()) {
             if (parseWrapped) {
                 // 需要处理 errorCode
                 runCatching {
-                    this.response.body<BaseData<T>>()
+                    json.decodeFromString<BaseData<T>>(this.result.second.toString())
                 }.onFailure {
                     action(null)
                 }.onSuccess {
@@ -83,7 +65,7 @@ suspend inline fun <reified T> KtorResult.onSuccess(action: (value: T?) -> Unit)
                 }
             } else {
                 runCatching {
-                    this.response.body<T>()
+                    json.decodeFromString<T>(this.result.toString())
                 }.onFailure {
                     action(null)
                 }.onSuccess {
@@ -98,22 +80,22 @@ suspend inline fun <reified T> KtorResult.onSuccess(action: (value: T?) -> Unit)
 /**
  * 异常 + code 不在 [200, 300) 范围内
  */
-suspend inline fun KtorResult.onFailure(action: (exception: RemoteException) -> Unit): KtorResult {
-    if (this is KtorResult.Failure) {
+inline fun NetworkResult.onFailure(action: (exception: RemoteException) -> Unit): NetworkResult {
+    if (this is NetworkResult.Failure) {
         val exception = RemoteException(-999, this.exception)
         action(exception)
     } else {
-        if (this is KtorResult.Success) {
-            if (this.response.status.isSuccess().not()) {
-                val statusCode = this.response.status.value
+        if (this is NetworkResult.Success) {
+            if (this.result.first.isSuccess().not()) {
+                val statusCode = this.result.first.statusCode ?: -998
                 val exception = RuntimeException("HTTP error with status code: $statusCode")
                 val ktorException = RemoteException(statusCode, exception)
                 action(ktorException)
             } else {
                 if (parseWrapped) {
                     // 需要处理 errorCode
-                    val errorCode = this.response.body<BaseData<String>>().errorCode
-                    val errorMsg = this.response.body<BaseData<String>>().errorMsg
+                    val errorCode = this.result.second.optInt("errorCode")
+                    val errorMsg = this.result.second.optString("errorMsg")
                     // 解析数据，若 errorCode != 0 代表业务失败，则返回 BizException
                     if (errorCode != 0) {
                         val exception = RuntimeException("服务器返回: errorCode = $errorCode, errorMsg = $errorMsg")

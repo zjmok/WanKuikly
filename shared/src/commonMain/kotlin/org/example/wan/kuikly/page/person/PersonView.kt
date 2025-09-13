@@ -171,7 +171,7 @@ internal class PersonView : ComposeView<PersonViewAttr, PersonViewEvent>() {
                             }
                             event {
                                 click {
-                                    toast("click")
+                                    routerModule.openPage("TestVfor")
                                 }
                             }
                             Image {

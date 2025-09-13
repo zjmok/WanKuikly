@@ -7,6 +7,8 @@ import com.tencent.kuikly.core.base.ComposeView
 import com.tencent.kuikly.core.base.ViewBuilder
 import com.tencent.kuikly.core.base.ViewContainer
 import com.tencent.kuikly.core.base.ViewRef
+import com.tencent.kuikly.core.coroutines.launch
+import com.tencent.kuikly.core.directives.vfor
 import com.tencent.kuikly.core.directives.vforIndex
 import com.tencent.kuikly.core.nvi.serialization.json.JSONObject
 import com.tencent.kuikly.core.reactive.handler.observable
@@ -18,7 +20,12 @@ import com.tencent.kuikly.core.views.TabItem
 import com.tencent.kuikly.core.views.Tabs
 import com.tencent.kuikly.core.views.Text
 import com.tencent.kuikly.core.views.View
-import kotlinx.serialization.json.Json
+import com.tencent.kuiklyx.coroutines.Kuikly
+import io.ktor.client.request.get
+import io.ktor.client.request.parameter
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
+import org.example.wan.kuikly.data.Articles
 import org.example.wan.kuikly.data.ArticlesTreeItem
 import org.example.wan.kuikly.data.BannerItem
 import org.example.wan.kuikly.data.DataX
@@ -27,17 +34,23 @@ import org.example.wan.kuikly.data.remote.WanAPI.PROJECT_LIST
 import org.example.wan.kuikly.data.remote.WanAPI.PROJECT_TREE
 import org.example.wan.kuikly.data.remote.WanAPI.WX_LIST
 import org.example.wan.kuikly.data.remote.WanAPI.WX_TREE
+import org.example.wan.kuikly.data.remote.biz
+import org.example.wan.kuikly.data.remote.ktorClient
+import org.example.wan.kuikly.data.remote.onFailure
+import org.example.wan.kuikly.data.remote.onSuccess
+import org.example.wan.kuikly.data.remote.runCatchingKtor
+import org.example.wan.kuikly.data.remote.runResponseData
 import org.example.wan.kuikly.utils.Fore
-import org.example.wan.kuikly.utils.fromJson
+import org.example.wan.kuikly.utils.bridgeModule
+import org.example.wan.kuikly.utils.ifNotNull
+import org.example.wan.kuikly.utils.lifecycleScope
 import org.example.wan.kuikly.utils.log
 import org.example.wan.kuikly.utils.networkModule
-import org.example.wan.kuikly.utils.toast
 
 internal class TreeTabItem {
     var moduleName by observable("")
     var tabId by observable("")
     var tabTitle by observable("")
-    var isLoad = false
     var articleList by observableList<DataX>()
     var bannerList by observableList<BannerItem>()
 }
@@ -82,52 +95,52 @@ internal class ArticleTreeView : ComposeView<ArticleTreeViewAttr, ArticleTreeVie
                 url = BASE_URL + WX_TREE
             }
         }
+
+        fetchTabs(url)
+
+    }
+
+    private fun fetchTabs(url: String) {
         log("url = $url")
         networkModule.requestGet(url, JSONObject().apply {
 //            put("", "")
         }) { data, success, errorMsg, response ->
-            if (success.not()) {
-                toast(errorMsg)
-                return@requestGet
+            runResponseData {
+                response to data
+            }.onFailure {
+                it.biz(this)
+            }.onSuccess<List<ArticlesTreeItem>> {
+                it.ifNotNull {
+                    it.map {
+                        TreeTabItem().apply {
+                            tabId = "${it.id}"
+                            tabTitle = it.nameDecoded
+                            moduleName = this@ArticleTreeView.moduleName
+                        }
+                    }.let {
+                        tabList.clear()
+                        tabList += it
+                    }
+
+                    // 加载 defaultIndex 的数据，进入页面当 defaultIndex != 0 时 PageList 会执行回调 pageIndexDidChanged
+                    if (defaultIndex == 0 &&
+                        defaultIndex < tabList.size && // 防止越界
+                        tabList[defaultIndex].articleList.isEmpty() // 未加载数据
+                    ) {
+                        loadData(defaultIndex)
+                    }
+                }
             }
-
-//            println(data)
-            setTabList(data)
-        }
-
-    }
-
-    private fun setTabList(data: JSONObject) {
-        val tree = data.optJSONArray("data")
-        Json.decodeFromString<List<ArticlesTreeItem>>(tree.toString())
-        val list = fromJson<List<ArticlesTreeItem>>(tree.toString()) ?: return
-//        println(list)
-
-        tabList.clear()
-        // 遍历文章列表数据
-        for (it in list) {
-            val tabItem = TreeTabItem().apply {
-                tabId = "${it.id}"
-                tabTitle = it.nameDecoded
-                isLoad = false
-            }
-            tabItem.moduleName = moduleName
-            tabList.add(tabItem)
-        }
-
-        // 加载 defaultIndex 的数据
-        if (list.isNotEmpty() && defaultIndex < tabList.size && tabList[defaultIndex].isLoad.not()) {
-            loadData(defaultIndex)
         }
     }
 
-    private fun loadData(index: Int) {
-        if (index >= tabList.size) {
+    private fun loadData(tabIndex: Int) {
+        if (tabIndex >= tabList.size) {
             return
         }
-        log("${moduleName} 列表加载 index=$index")
+        log("$moduleName ${tabList[tabIndex].tabTitle} 列表加载 tabIndex = $tabIndex")
 
-        val id = tabList[index].tabId
+        val id = tabList[tabIndex].tabId
         var url = ""
         val param = JSONObject()
 
@@ -156,27 +169,48 @@ internal class ArticleTreeView : ComposeView<ArticleTreeViewAttr, ArticleTreeVie
 
         }
 
-//        log("url = $url")
-        networkModule.requestGet(url, param) { data, success, errorMsg, response ->
-            if (success.not()) {
-                toast(errorMsg)
-                return@requestGet
-            }
+        bridgeModule.currentThread(::println)
 
-//            println(data)
-            setArticleList(data, index)
+        fetchList(url, param, tabIndex)
+//        fetchListKtor(url, param, tabIndex)
+
+    }
+
+    private fun fetchList(url: String, param: JSONObject, tabIndex: Int) {
+        log("url = $url")
+        networkModule.requestGet(url, param) { data, success, errorMsg, response ->
+            runResponseData {
+                response to data
+            }.apply {
+                this.parseWrapped = true
+            }.onFailure {
+                it.biz(this)
+            }.onSuccess<Articles> {
+                it.ifNotNull {
+                    tabList[tabIndex].articleList += it.datas
+                }
+            }
         }
     }
 
-    private fun setArticleList(data: JSONObject, index: Int) {
-        val articles = data.optJSONObject("data")
-        val dates = articles?.optJSONArray("datas")
-
-        val list = fromJson<List<DataX>>(dates.toString()) ?: return
-//        println(list)
-
-        tabList[index].articleList += list
-        tabList[index].isLoad = true
+    private fun fetchListKtor(url: String, param: JSONObject, tabIndex: Int) {
+        lifecycleScope.launch {
+            runCatchingKtor {
+                ktorClient.get(url) {
+                    param.toMap().entries.forEach {
+                        parameter(it.key, it.value)
+                    }
+                }
+            }.onFailure {
+                it.biz(this@ArticleTreeView)
+            }.onSuccess<Articles> {
+                withContext(Dispatchers.Kuikly[this@ArticleTreeView]) {
+                    it.ifNotNull {
+                        tabList[tabIndex].articleList += it.datas
+                    }
+                }
+            }
+        }
     }
 
     override fun body(): ViewBuilder {
@@ -277,39 +311,26 @@ internal class ArticleTreeView : ComposeView<ArticleTreeViewAttr, ArticleTreeVie
                                 value.toString().toIntOrNull()?.let { realIndex ->
                                     log("二级Tab index = $realIndex")
                                     // 加载 index 数据，手动实现懒加载
-                                    if (realIndex < ctx.tabList.size && ctx.tabList[realIndex].isLoad.not()) {
+                                    if (realIndex < ctx.tabList.size && ctx.tabList[realIndex].articleList.isEmpty()) {
                                         ctx.loadData(realIndex)
                                     }
                                 }
                             }
                         }
                     }
-                    vforIndex({ ctx.tabList }) { item, index, count ->
-                        View {
+                    vfor({ ctx.tabList }) { item ->
+                        ArticleList {
                             attr {
-//                                backgroundColor(Color.YELLOW)
-                                allCenter()
-                            }
-//                            Text {
-//                                attr {
-//                                    text("${ctx.module}: tab = ${item.tabTitle}, id = ${item.id}")
-//                                    fontSize(20f)
-//                                    color(Color.BLUE)
-//                                }
-//                            }
-                            ArticleList {
-                                attr {
-                                    tabItem = ctx.tabList[index]
-                                    listHeight = (
-                                            ctx.pagerData.pageViewHeight
-                                                    - ctx.pagerData.safeAreaInsets.top
-                                                    - ctx.pagerData.safeAreaInsets.bottom
-                                                    - 50f // 二级 tab 高
-                                                    - 60f // 一级 tab 高
-                                                    - 0.5f // 分割线高
-                                                    - 0.5f // 分割线高
-                                            )
-                                }
+                                tabItem = item
+                                listHeight = (
+                                        ctx.pagerData.pageViewHeight
+                                                - ctx.pagerData.safeAreaInsets.top
+                                                - ctx.pagerData.safeAreaInsets.bottom
+                                                - 50f // 二级 tab 高
+                                                - 60f // 一级 tab 高
+                                                - 0.5f // 分割线高
+                                                - 0.5f // 分割线高
+                                        )
                             }
                         }
                     }

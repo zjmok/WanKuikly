@@ -13,7 +13,7 @@ import io.ktor.http.HttpMethod
 import io.ktor.http.content.ByteArrayContent
 import io.ktor.http.content.OutgoingContent
 import io.ktor.http.content.TextContent
-import org.example.wan.kuikly.utils.takeNotNull
+import org.example.wan.kuikly.utils.ifNotNull
 import org.example.wan.kuikly.utils.toJson
 
 class KtorLoggerInterceptor {
@@ -35,7 +35,7 @@ class KtorLoggerInterceptor {
                 if (context.method != HttpMethod.Get) {
                     val body = context.body
                     (body as? OutgoingContent)?.let {
-                        body.contentLength.takeNotNull {
+                        body.contentLength.ifNotNull {
                             if (it > 0) {
                                 when (body) {
                                     is EmptyContent -> {}

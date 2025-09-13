@@ -71,6 +71,10 @@ internal class BridgeModule : Module() {
         callNativeMethod("toast", methodArgs, null)
     }
 
+    fun currentThread(callbackFn: CallbackFn?): String {
+        return syncCallNativeMethod("currentThread", null, callbackFn)
+    }
+
     fun openPage(
         url: String,
         closeCurPage: Boolean = false,

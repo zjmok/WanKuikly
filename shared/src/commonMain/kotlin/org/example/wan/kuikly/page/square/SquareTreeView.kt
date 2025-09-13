@@ -7,6 +7,7 @@ import com.tencent.kuikly.core.base.ComposeView
 import com.tencent.kuikly.core.base.ViewBuilder
 import com.tencent.kuikly.core.base.ViewContainer
 import com.tencent.kuikly.core.base.ViewRef
+import com.tencent.kuikly.core.coroutines.launch
 import com.tencent.kuikly.core.directives.vforIndex
 import com.tencent.kuikly.core.nvi.serialization.json.JSONObject
 import com.tencent.kuikly.core.reactive.handler.observable
@@ -18,17 +19,28 @@ import com.tencent.kuikly.core.views.TabItem
 import com.tencent.kuikly.core.views.Tabs
 import com.tencent.kuikly.core.views.Text
 import com.tencent.kuikly.core.views.View
-import org.example.wan.kuikly.data.DataX
+import com.tencent.kuiklyx.coroutines.Kuikly
+import io.ktor.client.request.get
+import io.ktor.client.request.parameter
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
+import org.example.wan.kuikly.data.Articles
 import org.example.wan.kuikly.data.remote.WanAPI.BASE_URL
 import org.example.wan.kuikly.data.remote.WanAPI.QA_LIST
 import org.example.wan.kuikly.data.remote.WanAPI.SQUARE_LIST
+import org.example.wan.kuikly.data.remote.biz
+import org.example.wan.kuikly.data.remote.ktorClient
+import org.example.wan.kuikly.data.remote.onFailure
+import org.example.wan.kuikly.data.remote.onSuccess
+import org.example.wan.kuikly.data.remote.runCatchingKtor
+import org.example.wan.kuikly.data.remote.runResponseData
 import org.example.wan.kuikly.page.common.ArticleList
 import org.example.wan.kuikly.page.common.TreeTabItem
 import org.example.wan.kuikly.utils.Fore
-import org.example.wan.kuikly.utils.fromJson
+import org.example.wan.kuikly.utils.ifNotNull
+import org.example.wan.kuikly.utils.lifecycleScope
 import org.example.wan.kuikly.utils.log
 import org.example.wan.kuikly.utils.networkModule
-import org.example.wan.kuikly.utils.toast
 
 internal class SquareTreeView : ComposeView<SquareTreeViewAttr, SquareTreeViewEvent>() {
 
@@ -54,33 +66,37 @@ internal class SquareTreeView : ComposeView<SquareTreeViewAttr, SquareTreeViewEv
     }
 
     private fun setSquareTabList() {
-        tabList.clear()
-        listOf("搜索", "广场", "问答").forEach {
-            val tabItem = TreeTabItem().apply {
+        listOf("搜索", "广场", "问答").map {
+            TreeTabItem().apply {
                 moduleName = "广场"
                 tabTitle = it
-                isLoad = false
             }
-            tabList.add(tabItem)
+        }.let {
+            tabList.clear()
+            tabList += it
         }
 
-        // 加载 defaultIndex 的数据
-        if (defaultIndex < tabList.size && tabList[defaultIndex].isLoad.not()) {
+        // 加载 defaultIndex 的数据，进入页面当 defaultIndex != 0 时 PageList 会执行回调 pageIndexDidChanged
+        if (defaultIndex == 0 &&
+            defaultIndex < tabList.size && // 防止越界
+            tabList[defaultIndex].articleList.isEmpty() // 未加载数据
+        ) {
             loadData(defaultIndex)
         }
     }
 
-    private fun loadData(index: Int) {
-        if (index >= tabList.size) {
+    private fun loadData(tabIndex: Int) {
+        if (tabIndex >= tabList.size) {
             return
         }
-        log("加载数据 index=$index")
+        log("${tabList[tabIndex].moduleName} ${tabList[tabIndex].tabTitle} 列表加载 tabIndex = $tabIndex")
 
         var url = ""
         val param = JSONObject()
 
-        when (tabList[index].tabTitle) {
+        when (tabList[tabIndex].tabTitle) {
             "搜索" -> {
+                // todo
                 return
             }
 
@@ -106,27 +122,45 @@ internal class SquareTreeView : ComposeView<SquareTreeViewAttr, SquareTreeViewEv
             }
         }
 
+        fetchList(url, param, tabIndex)
+//        fetchListKtor(url, param, tabIndex)
+
+    }
+
+    private fun fetchList(url: String, param: JSONObject, tabIndex: Int) {
         log("url = $url")
-
         networkModule.requestGet(url, param) { data, success, errorMsg, response ->
-            if (success.not()) {
-                toast(errorMsg)
-                return@requestGet
+            runResponseData {
+                response to data
+            }.onFailure {
+                it.biz(this)
+            }.onSuccess<Articles> {
+                it.ifNotNull {
+                    tabList[tabIndex].articleList += it.datas
+                }
             }
-
-//            println(data)
-            setArticleList(data, index)
         }
     }
 
-    private fun setArticleList(data: JSONObject, index: Int) {
-        val articles = data.optJSONObject("data")
-        val dates = articles?.optJSONArray("datas")
+    private fun fetchListKtor(url: String, param: JSONObject, tabIndex: Int) {
+        lifecycleScope.launch {
+            runCatchingKtor {
+                ktorClient.get(url) {
+                    param.toMap().entries.forEach {
+                        parameter(it.key, it.value)
+                    }
+                }
+            }.onFailure {
+                it.biz(this@SquareTreeView)
+            }.onSuccess<Articles> {
+                withContext(Dispatchers.Kuikly[this@SquareTreeView]) {
+                    it.ifNotNull {
+                        tabList[tabIndex].articleList += it.datas
+                    }
+                }
+            }
+        }
 
-        val list = fromJson<List<DataX>>(dates.toString()) ?: return
-
-        tabList[index].articleList += list
-        tabList[index].isLoad = true
     }
 
     override fun body(): ViewBuilder {
@@ -227,7 +261,7 @@ internal class SquareTreeView : ComposeView<SquareTreeViewAttr, SquareTreeViewEv
                                 value.toString().toIntOrNull()?.let { realIndex ->
                                     log("二级Tab index = $realIndex")
                                     // 加载 index 数据，手动实现懒加载
-                                    if (realIndex < ctx.tabList.size && ctx.tabList[realIndex].isLoad.not()) {
+                                    if (realIndex < ctx.tabList.size && ctx.tabList[realIndex].articleList.isEmpty()) {
                                         ctx.loadData(realIndex)
                                     }
                                 }

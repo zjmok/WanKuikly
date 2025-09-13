@@ -5,26 +5,37 @@ import com.tencent.kuikly.core.base.ComposeEvent
 import com.tencent.kuikly.core.base.ComposeView
 import com.tencent.kuikly.core.base.ViewBuilder
 import com.tencent.kuikly.core.base.ViewContainer
+import com.tencent.kuikly.core.coroutines.launch
 import com.tencent.kuikly.core.nvi.serialization.json.JSONObject
 import com.tencent.kuikly.core.reactive.handler.observable
+import com.tencent.kuiklyx.coroutines.Kuikly
+import io.ktor.client.request.get
+import io.ktor.client.request.parameter
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
+import org.example.wan.kuikly.data.Articles
 import org.example.wan.kuikly.data.BannerItem
-import org.example.wan.kuikly.data.DataX
 import org.example.wan.kuikly.data.remote.WanAPI.BANNER_LIST
 import org.example.wan.kuikly.data.remote.WanAPI.BASE_URL
 import org.example.wan.kuikly.data.remote.WanAPI.HOME_LIST
+import org.example.wan.kuikly.data.remote.biz
+import org.example.wan.kuikly.data.remote.ktorClient
+import org.example.wan.kuikly.data.remote.onFailure
+import org.example.wan.kuikly.data.remote.onSuccess
+import org.example.wan.kuikly.data.remote.runCatchingKtor
+import org.example.wan.kuikly.data.remote.runResponseData
 import org.example.wan.kuikly.page.common.ArticleList
 import org.example.wan.kuikly.page.common.TreeTabItem
-import org.example.wan.kuikly.utils.fromJson
+import org.example.wan.kuikly.utils.ifNotNull
+import org.example.wan.kuikly.utils.lifecycleScope
 import org.example.wan.kuikly.utils.log
 import org.example.wan.kuikly.utils.networkModule
-import org.example.wan.kuikly.utils.toast
 
 internal class HomeListView : ComposeView<HomeListViewAttr, HomeListViewEvent>() {
 
     private val tabItem by observable(TreeTabItem().apply {
         moduleName = "首页"
         tabTitle = "首页"
-        isLoad = false
     })
 
     override fun createEvent(): HomeListViewEvent {
@@ -46,23 +57,25 @@ internal class HomeListView : ComposeView<HomeListViewAttr, HomeListViewEvent>()
         val url = BASE_URL + BANNER_LIST
 
         log("url = $url")
-        networkModule.requestGet(url, JSONObject()) { data, success, errorMsg, response ->
-            if (success.not()) {
-                toast(errorMsg)
-                return@requestGet
+        networkModule.requestGet(url, JSONObject().apply {
+//            put("", "")
+        }) { data, success, errorMsg, response ->
+            runResponseData {
+                response to data
+            }.onFailure {
+                it.biz(this)
+            }.onSuccess<List<BannerItem>> {
+                it.ifNotNull {
+                    tabItem.bannerList.clear()
+                    tabItem.bannerList += it
+                }
             }
-
-            val banner = data.optJSONArray("data")
-
-            val list = fromJson<List<BannerItem>>(banner.toString()) ?: return@requestGet
-//            println(list)
-
-            tabItem.bannerList.clear()
-            tabItem.bannerList += list
         }
+
     }
 
     private fun loadList() {
+        log("${tabItem.moduleName} 列表加载")
 
         var page = 0
         val url = BASE_URL + HOME_LIST.run {
@@ -72,27 +85,44 @@ internal class HomeListView : ComposeView<HomeListViewAttr, HomeListViewEvent>()
             put("page_size", "10")
         }
 
+        fetchList(url, param)
+//        fetchListKtor(url, param)
+
+    }
+
+    private fun fetchList(url: String, param: JSONObject) {
         log("url = $url")
         networkModule.requestGet(url, param) { data, success, errorMsg, response ->
-            if (success.not()) {
-                toast(errorMsg)
-                return@requestGet
+            runResponseData {
+                response to data
+            }.onFailure {
+                it.biz(this)
+            }.onSuccess<Articles> {
+                it.ifNotNull {
+                    tabItem.articleList += it.datas
+                }
             }
-
-//            println(data)
-            setArticleList(data)
         }
     }
 
-    private fun setArticleList(data: JSONObject) {
-        val articles = data.optJSONObject("data")
-        val dates = articles?.optJSONArray("datas")
-
-        val list = fromJson<List<DataX>>(dates.toString()) ?: return
-//        println(list)
-
-        tabItem.articleList += list
-        tabItem.isLoad = true
+    private fun fetchListKtor(url: String, param: JSONObject) {
+        lifecycleScope.launch {
+            runCatchingKtor {
+                ktorClient.get(url) {
+                    param.toMap().entries.forEach {
+                        parameter(it.key, it.value)
+                    }
+                }
+            }.onFailure {
+                it.biz(this@HomeListView)
+            }.onSuccess<Articles> {
+                withContext(Dispatchers.Kuikly[this@HomeListView]) {
+                    it.ifNotNull {
+                        tabItem.articleList += it.datas
+                    }
+                }
+            }
+        }
     }
 
     override fun body(): ViewBuilder {
