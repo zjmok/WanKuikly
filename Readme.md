@@ -40,10 +40,9 @@ android
 
 todo，待完成
 
-- 下拉上拉处理
-- WebPager
 - 登录，存储
 - 搜索页面
+- WebPager
 - 解决硬编码
 - 
 
@@ -56,6 +55,7 @@ todo，待完成
 - 多个容器高度设置 0.5f，显示不一致，多个分割线大小不一致，在模拟器上 1f 也大小不一致
 - ListPage 懒加载优化
 - Android API 未适配到最新版，最高支持 34
+- Ktor 网络请求后更新数据，大概率会报错，用回 networkModel
 
 ---
 

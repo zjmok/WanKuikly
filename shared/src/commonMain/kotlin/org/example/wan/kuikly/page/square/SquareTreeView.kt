@@ -101,9 +101,9 @@ internal class SquareTreeView : ComposeView<SquareTreeViewAttr, SquareTreeViewEv
             }
 
             "广场" -> {
-                var page = 0
+                tabList[tabIndex].articlePage = 0
                 url = BASE_URL + SQUARE_LIST.run {
-                    this.replace("{page}", "$page")
+                    this.replace("{page}", "${tabList[tabIndex].articlePage}")
                 }
                 param.apply {
                     put("page_size", "10")

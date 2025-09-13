@@ -51,6 +51,7 @@ internal class TreeTabItem {
     var moduleName by observable("")
     var tabId by observable("")
     var tabTitle by observable("")
+    var articlePage by observable(0)
     var articleList by observableList<DataX>()
     var bannerList by observableList<BannerItem>()
 }
@@ -140,27 +141,26 @@ internal class ArticleTreeView : ComposeView<ArticleTreeViewAttr, ArticleTreeVie
         }
         log("$moduleName ${tabList[tabIndex].tabTitle} 列表加载 tabIndex = $tabIndex")
 
-        val id = tabList[tabIndex].tabId
         var url = ""
         val param = JSONObject()
 
         when (moduleName) {
             "项目" -> {
-                var page = 1
+                tabList[tabIndex].articlePage = 1
                 url = BASE_URL + PROJECT_LIST.run {
-                    this.replace("{page}", "$page")
+                    this.replace("{page}", "${tabList[tabIndex].articlePage}")
                 }
                 param.apply {
-                    put("cid", id)
+                    put("cid", tabList[tabIndex].tabId)
                     put("page_size", "10")
                 }
             }
 
             "订阅", "公众号" -> {
-                var page = 1
+                tabList[tabIndex].articlePage = 1
                 url = BASE_URL + WX_LIST.run {
-                    this.replace("{id}", id)
-                        .replace("{page}", "$page")
+                    this.replace("{id}", tabList[tabIndex].tabId)
+                        .replace("{page}", "${tabList[tabIndex].articlePage}")
                 }
                 param.apply {
                     put("page_size", "10")

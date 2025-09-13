@@ -77,9 +77,9 @@ internal class HomeListView : ComposeView<HomeListViewAttr, HomeListViewEvent>()
     private fun loadList() {
         log("${tabItem.moduleName} 列表加载")
 
-        var page = 0
+        tabItem.articlePage = 0
         val url = BASE_URL + HOME_LIST.run {
-            this.replace("{page}", "$page")
+            this.replace("{page}", "${tabItem.articlePage}")
         }
         val param = JSONObject().apply {
             put("page_size", "10")
