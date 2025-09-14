@@ -281,7 +281,7 @@ internal class TestPage : BasePager() {
                                 }
                                 val result = httpResponse.body<BaseData<List<BannerItem>>>()
                                 println(result)
-                                toast("${result.data.firstOrNull()?.title}")
+                                toast("${result.data?.firstOrNull()?.title}")
                             }
                         }
                     }

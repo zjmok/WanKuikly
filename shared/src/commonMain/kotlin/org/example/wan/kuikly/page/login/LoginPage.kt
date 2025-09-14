@@ -212,9 +212,8 @@ internal class LoginPage : BasePager() {
             }.onSuccess<SuperUserInfo> {
                 it.ifNotNull {
                     val json = it.toJson()
-                    // save
+                    // save notify
                     sharedPreferencesModule.setString("superUserInfo", json)
-                    // notify
                     postNotify("superUserInfo", JSONObject(json))
                     // close
                     bridgeModule.closePage()

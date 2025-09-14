@@ -74,6 +74,7 @@ suspend inline fun <reified T> KtorResult.onSuccess(action: (value: T?) -> Unit)
                 runCatching {
                     this.response.body<BaseData<T>>()
                 }.onFailure {
+                    println(it) // 解析失败
                     action(null)
                 }.onSuccess {
                     if (it.errorCode == 0) {
@@ -85,6 +86,7 @@ suspend inline fun <reified T> KtorResult.onSuccess(action: (value: T?) -> Unit)
                 runCatching {
                     this.response.body<T>()
                 }.onFailure {
+                    println(it) // 解析失败
                     action(null)
                 }.onSuccess {
                     action(it)

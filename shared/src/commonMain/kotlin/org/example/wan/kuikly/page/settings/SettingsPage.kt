@@ -369,6 +369,7 @@ internal class SettingsPage : BasePager() {
                                     click {
                                         showAlert("提示", "要注销登录吗", "取消", "确定") { jsonObject ->
                                             if (jsonObject?.optBoolean("confirm") == true) {
+                                                sharedPreferencesModule.setString("Cookie", "")
                                                 sharedPreferencesModule.setString("superUserInfo", "")
                                                 postNotify("superUserInfo")
                                                 toast("已退出登录")

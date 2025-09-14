@@ -56,28 +56,33 @@ inline fun <reified T> NetworkResult.onSuccess(
     if (this is NetworkResult.Success) {
         if (this.result.first.isSuccess()) {
             if (parseWrapped) {
-                // 需要处理 errorCode
-                runCatching {
-                    val dataJson = this.result.second.toString()
-                    json.decodeFromString<BaseData<T>>(dataJson)
-                }.onFailure {
-                    bodyAction(null)
-                }.onSuccess {
-                    if (it.errorCode == 0) {
+                // 直接 optInt 减少解析失败的情况
+                val errorCode = this.result.second.optInt("errorCode")
+                if (errorCode == 0) {
+                    // 需要处理 errorCode
+                    runCatching {
+                        val dataJson = this.result.second.toString()
+                        json.decodeFromString<BaseData<T>>(dataJson)
+                    }.onFailure {
+                        println(it) // 解析失败
+                        bodyAction(null)
+                    }.onSuccess {
+                        // header
                         headerAction?.let {
                             val headersJson = this.result.first.headerFields.toString()
                             val headerMap = json.decodeFromString<Map<String, List<String>>>(headersJson)
                             headerAction.invoke(headerMap)
                         }
-
+                        // body
                         bodyAction(it.data)
                     }
-                    // errorCode != 0 onFailure
                 }
+                // errorCode != 0 onFailure
             } else {
                 runCatching {
                     json.decodeFromString<T>(this.result.toString())
                 }.onFailure {
+                    println(it) // 解析失败
                     bodyAction(null)
                 }.onSuccess {
                     bodyAction(it)
@@ -95,21 +100,25 @@ inline fun <reified T> NetworkResult.onSuccess(action: (value: T?) -> Unit): Net
     if (this is NetworkResult.Success) {
         if (this.result.first.isSuccess()) {
             if (parseWrapped) {
-                // 需要处理 errorCode
-                runCatching {
-                    json.decodeFromString<BaseData<T>>(this.result.second.toString())
-                }.onFailure {
-                    action(null)
-                }.onSuccess {
-                    if (it.errorCode == 0) {
+                // 直接 optInt 减少解析失败的情况
+                val errorCode = this.result.second.optInt("errorCode")
+                if (errorCode == 0) {
+                    // 需要处理 errorCode
+                    runCatching {
+                        json.decodeFromString<BaseData<T>>(this.result.second.toString())
+                    }.onFailure {
+                        println(it) // 解析失败
+                        action(null)
+                    }.onSuccess {
                         action(it.data)
                     }
-                    // errorCode != 0 onFailure
                 }
+                // errorCode != 0 onFailure
             } else {
                 runCatching {
                     json.decodeFromString<T>(this.result.toString())
                 }.onFailure {
+                    println(it) // 解析失败
                     action(null)
                 }.onSuccess {
                     action(it)
