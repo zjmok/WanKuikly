@@ -32,7 +32,7 @@ import org.example.wan.kuikly.utils.toast
 
 internal class PersonView : ComposeView<PersonViewAttr, PersonViewEvent>() {
 
-    private var superUserInfo by observable<SuperUserInfo?>(SuperUserInfo())
+    private var superUserInfo by observable<SuperUserInfo?>(null)
 
     private lateinit var notiRef: CallbackRef
 
@@ -124,7 +124,7 @@ internal class PersonView : ComposeView<PersonViewAttr, PersonViewEvent>() {
                                 }
                                 Text {
                                     attr {
-                                        text(ctx.superUserInfo?.userInfo?.nickname ?: "null")
+                                        text(ctx.superUserInfo?.userInfo?.nickname ?: "未登录")
                                         fontSize(20f)
                                         color(Color.PrimaryText)
                                     }
@@ -135,7 +135,7 @@ internal class PersonView : ComposeView<PersonViewAttr, PersonViewEvent>() {
                                     }
                                     Text {
                                         attr {
-                                            text("用户名: ${ctx.superUserInfo?.userInfo?.username ?: "null"}")
+                                            text("用户名: ${ctx.superUserInfo?.userInfo?.username}")
                                             fontSize(16f)
                                             color(Color.SecondaryText)
                                         }
@@ -152,7 +152,7 @@ internal class PersonView : ComposeView<PersonViewAttr, PersonViewEvent>() {
                                 Text {
                                     attr {
                                         marginTop(8f)
-                                        text("邮箱: ${ctx.superUserInfo?.userInfo?.email ?: "null"}")
+                                        text("邮箱: ${ctx.superUserInfo?.userInfo?.email}")
                                         fontSize(16f)
                                         color(Color.SecondaryText)
                                     }
