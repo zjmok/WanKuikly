@@ -28,6 +28,7 @@ import org.example.wan.kuikly.utils.fromJson
 import org.example.wan.kuikly.utils.removeNotify
 import org.example.wan.kuikly.utils.routerModule
 import org.example.wan.kuikly.utils.sharedPreferencesModule
+import org.example.wan.kuikly.utils.toast
 
 internal class PersonView : ComposeView<PersonViewAttr, PersonViewEvent>() {
 
@@ -183,7 +184,7 @@ internal class PersonView : ComposeView<PersonViewAttr, PersonViewEvent>() {
                             }
                             event {
                                 click {
-                                    routerModule.openPage("register")
+                                    toast("开发中")
                                 }
                             }
                             Image {
@@ -196,7 +197,7 @@ internal class PersonView : ComposeView<PersonViewAttr, PersonViewEvent>() {
                                 attr {
                                     margin(left = 10f, right = 10f)
                                     flex(1f)
-                                    text("RegisterPage")
+                                    text("item")
                                     fontSize(18f)
                                 }
                             }
@@ -269,7 +270,7 @@ internal class PersonView : ComposeView<PersonViewAttr, PersonViewEvent>() {
                             }
                             event {
                                 click {
-                                    routerModule.openPage("TestVfor")
+                                    toast("开发中")
                                 }
                             }
                             Image {
@@ -282,7 +283,7 @@ internal class PersonView : ComposeView<PersonViewAttr, PersonViewEvent>() {
                                 attr {
                                     margin(left = 10f, right = 10f)
                                     flex(1f)
-                                    text("TestVforPage")
+                                    text("item")
                                     fontSize(18f)
                                 }
                             }
@@ -312,7 +313,8 @@ internal class PersonView : ComposeView<PersonViewAttr, PersonViewEvent>() {
                             }
                             event {
                                 click {
-                                    routerModule.openPage("test")
+//                                    routerModule.openPage("test")
+                                    toast("开发中")
                                 }
                             }
                             Image {
@@ -325,7 +327,8 @@ internal class PersonView : ComposeView<PersonViewAttr, PersonViewEvent>() {
                                 attr {
                                     margin(left = 10f, right = 10f)
                                     flex(1f)
-                                    text("TestPage")
+//                                    text("TestPage")
+                                    text("item")
                                     fontSize(18f)
                                 }
                             }

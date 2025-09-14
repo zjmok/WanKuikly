@@ -91,7 +91,7 @@ internal class SettingsPage : BasePager() {
                             }
                             event {
                                 click {
-                                    toast("click")
+                                    toast("开发中")
                                 }
                             }
                             Image {
@@ -134,7 +134,7 @@ internal class SettingsPage : BasePager() {
                             }
                             event {
                                 click {
-                                    toast("click")
+                                    toast("开发中")
                                 }
                             }
                             Image {
@@ -177,7 +177,7 @@ internal class SettingsPage : BasePager() {
                             }
                             event {
                                 click {
-                                    toast("click")
+                                    toast("开发中")
                                 }
                             }
                             Image {
@@ -220,7 +220,7 @@ internal class SettingsPage : BasePager() {
                             }
                             event {
                                 click {
-                                    toast("click")
+                                    toast("开发中")
                                 }
                             }
                             Image {
