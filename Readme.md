@@ -26,7 +26,7 @@
 
 common
 - `kotlinx-serialization`
-- `kuiklyx-coroutines` 目前还有问题
+- `kuiklyx-coroutines` 内建协程目前仅支持基础的suspend方法执行能力，完整协程特性需要使用kotlinx协程
 - `ktor-client-core` + KMP
   - `ktor-client-okhttp`
   - `ktor-client-darwin`

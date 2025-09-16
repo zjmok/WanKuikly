@@ -71,6 +71,7 @@ internal class BridgeModule : Module() {
         callNativeMethod("toast", methodArgs, null)
     }
 
+    // todo 实现了 Android
     fun currentThread(callbackFn: CallbackFn?): String {
         return syncCallNativeMethod("currentThread", null, callbackFn)
     }

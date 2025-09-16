@@ -4,8 +4,6 @@ import org.example.wan.kuikly.base.BasePager
 import com.tencent.kuikly.core.annotations.Page
 import com.tencent.kuikly.core.base.Color
 import com.tencent.kuikly.core.base.ViewBuilder
-import com.tencent.kuikly.core.coroutines.delay
-import com.tencent.kuikly.core.coroutines.launch
 import com.tencent.kuikly.core.directives.vfor
 import com.tencent.kuikly.core.reactive.handler.observableList
 import com.tencent.kuikly.core.views.List
@@ -15,7 +13,7 @@ import org.example.wan.kuikly.page.common.NavBar
 import org.example.wan.kuikly.utils.bridgeModule
 
 @Page("TestVfor")
-internal class TestVforPage : BasePager() {
+internal class DebugVforPage : BasePager() {
 
     val observableList by observableList<Int>()
 

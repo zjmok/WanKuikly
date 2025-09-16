@@ -41,7 +41,6 @@ import org.example.wan.kuikly.data.remote.onSuccess
 import org.example.wan.kuikly.data.remote.runCatchingKtor
 import org.example.wan.kuikly.data.remote.runResponseData
 import org.example.wan.kuikly.utils.Fore
-import org.example.wan.kuikly.utils.bridgeModule
 import org.example.wan.kuikly.utils.ifNotNull
 import org.example.wan.kuikly.utils.lifecycleScope
 import org.example.wan.kuikly.utils.log
@@ -161,8 +160,6 @@ internal class ArticleTreeView : ComposeView<ArticleTreeViewAttr, ArticleTreeVie
             }
 
         }
-
-        bridgeModule.currentThread(::println)
 
         fetchList(url, param, tabIndex)
 //        fetchListKtor(url, param, tabIndex)

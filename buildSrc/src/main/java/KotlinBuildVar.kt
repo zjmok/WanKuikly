@@ -17,6 +17,7 @@ object Version {
     const val KOTLINX_COROUTINES_VERSION = "1.10.2"
     const val KOTLINX_SERIALIZATION_VERSION = "1.8.1" // 1.9.0 // 1.8.1
 
+    // https://repo1.maven.org/maven2/com/tencent/kuiklyx-open/coroutines/
 //    const val KUIKLYX_COROUTINES_VERSION = "1.1.0-2.0.21"
 //    const val KUIKLYX_COROUTINES_VERSION = "1.2.0-2.0.21"
     const val KUIKLYX_COROUTINES_VERSION = "1.3.0-2.0.21"

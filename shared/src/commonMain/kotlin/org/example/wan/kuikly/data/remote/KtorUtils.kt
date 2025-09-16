@@ -7,7 +7,8 @@ import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
 import io.ktor.client.statement.HttpResponse
 import io.ktor.http.isSuccess
 import io.ktor.serialization.kotlinx.json.json
-import org.example.wan.kuikly.data.BaseData
+import io.ktor.util.toMap
+import org.example.wan.kuikly.data.ApiResult
 import org.example.wan.kuikly.kmp.getEngine
 
 val ktorClient
@@ -20,7 +21,7 @@ val ktorClient
             }
             // 序列化
             install(ContentNegotiation) {
-                json()
+                json(org.example.wan.kuikly.utils.json)
             }
             // logger
             install(KtorLoggerInterceptor)
@@ -64,21 +65,31 @@ inline fun KtorResult.onSuccess(action: (value: HttpResponse) -> Unit): KtorResu
 }
 
 /**
- * @param action 解析失败时，回调参数为 null
+ * @param headerAction response header 数据
+ * @param bodyAction response body 数据，解析失败时，回调参数为 null
  */
-suspend inline fun <reified T> KtorResult.onSuccess(action: (value: T?) -> Unit): KtorResult {
+suspend inline fun <reified T> KtorResult.onSuccess(
+    noinline headerAction: ((header: Map<String, List<String>>) -> Unit)? = null,
+    bodyAction: (value: T?) -> Unit,
+): KtorResult {
     if (this is KtorResult.Success) {
         if (this.response.status.isSuccess()) {
+            // header
+            headerAction?.let {
+                val headers = this.response.headers.toMap()
+                headerAction(headers)
+            }
+            // body
             if (parseWrapped) {
                 // 需要处理 errorCode
                 runCatching {
-                    this.response.body<BaseData<T>>()
+                    this.response.body<ApiResult<T>>()
                 }.onFailure {
                     println(it) // 解析失败
-                    action(null)
+                    bodyAction(null)
                 }.onSuccess {
                     if (it.errorCode == 0) {
-                        action(it.data)
+                        bodyAction(it.data)
                     }
                     // errorCode != 0 onFailure
                 }
@@ -87,9 +98,9 @@ suspend inline fun <reified T> KtorResult.onSuccess(action: (value: T?) -> Unit)
                     this.response.body<T>()
                 }.onFailure {
                     println(it) // 解析失败
-                    action(null)
+                    bodyAction(null)
                 }.onSuccess {
-                    action(it)
+                    bodyAction(it)
                 }
             }
         }
@@ -113,14 +124,20 @@ suspend inline fun KtorResult.onFailure(action: (exception: RemoteException) -> 
                 action(ktorException)
             } else {
                 if (parseWrapped) {
-                    // 需要处理 errorCode
-                    val baseData = this.response.body<BaseData<String>>()
-                    // 解析数据，若 errorCode != 0 代表业务失败，则返回 BizException
-                    val errorCode = baseData.errorCode
-                    if (errorCode != 0) {
-                        // 服务器返回: errorCode = $errorCode, errorMsg = $errorMsg
-                        val errorMsg = baseData.errorMsg
-                        val bizException = RemoteException(errorCode, errorMsg)
+                    try {
+                        // 需要处理 errorCode
+                        val result = this.response.body<ApiResult<String>>()
+                        // 解析数据，若 errorCode != 0 代表业务失败，则返回 BizException
+                        val errorCode = result.errorCode
+                        if (errorCode != 0) {
+                            // 服务器返回: errorCode = $errorCode, errorMsg = $errorMsg
+                            val errorMsg = result.errorMsg
+                            val bizException = RemoteException(errorCode, errorMsg)
+                            action(bizException)
+                        }
+                    } catch (e: Exception) {
+                        // 返回非 ApiResult 格式 解析异常
+                        val bizException = RemoteException(-997, "数据异常")
                         action(bizException)
                     }
                     // errorCode == 0 onSuccess

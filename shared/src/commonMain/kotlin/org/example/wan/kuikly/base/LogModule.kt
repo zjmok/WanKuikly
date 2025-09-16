@@ -20,9 +20,7 @@ class LogModule : Module() {
         level: String = "d",
         tag: String = "WanKuikly",
     ) {
-        // callNativeMethod 异步调用
-        // syncCallNativeMethod 同步调用
-        val result = callNativeMethod("customLog", JSONObject().apply {
+        val result = toNativeMethod("customLog", JSONObject().apply {
             put("tag", tag)
             put("level", level)
             put("message", message)
@@ -35,29 +33,12 @@ class LogModule : Module() {
     }
 
     /**
-     * 异步调用 Native 方法
+     * 调用 Native 方法
      * @param methodName 调用方法名
      * @param data 传递给 Native 的数据
      * @param callbackFn Native 回调的函数
      */
-    fun callNativeMethod(
-        methodName: String,
-        data: JSONObject?,
-        callbackFn: CallbackFn?,
-    ) {
-        toNative(
-            false,
-            methodName,
-            data?.toString(),
-            callbackFn,
-            false
-        )
-    }
-
-    /**
-     * 同步调用 Native 方法
-     */
-    fun syncCallNativeMethod(
+    fun toNativeMethod(
         methodName: String,
         data: JSONObject?,
         callbackFn: CallbackFn?,

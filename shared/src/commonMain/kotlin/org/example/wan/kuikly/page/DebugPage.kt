@@ -36,12 +36,15 @@ import kotlinx.coroutines.delay
 import kotlinx.io.bytestring.ByteString
 import org.example.wan.kuikly.base.BasePager
 import org.example.wan.kuikly.base.LogModule
+import org.example.wan.kuikly.data.ApiResult
 import org.example.wan.kuikly.data.BannerItem
-import org.example.wan.kuikly.data.BaseData
 import org.example.wan.kuikly.data.remote.WanAPI
+import org.example.wan.kuikly.data.remote.biz
 import org.example.wan.kuikly.data.remote.ktorClient
 import org.example.wan.kuikly.data.remote.onFailure
 import org.example.wan.kuikly.data.remote.onSuccess
+import org.example.wan.kuikly.data.remote.request
+import org.example.wan.kuikly.data.remote.requestPost
 import org.example.wan.kuikly.data.remote.runCatchingKtor
 import org.example.wan.kuikly.kmp.getEngine
 import org.example.wan.kuikly.page.common.NavBar
@@ -51,8 +54,8 @@ import org.example.wan.kuikly.utils.Fore
 import org.example.wan.kuikly.utils.bridgeModule
 import org.example.wan.kuikly.utils.toast
 
-@Page("test")
-internal class TestPage : BasePager() {
+@Page("debug")
+internal class DebugPage : BasePager() {
 
     private var showAlert by observable(false)  // 定义响应式变量
 
@@ -130,6 +133,72 @@ internal class TestPage : BasePager() {
                     flexDirectionColumn()
                     justifyContentFlexStart()
                     alignItemsCenter() // 可能不生效，可能需要 item 内部指定
+                }
+                TestItem {
+                    attr {
+                        marginTop(10f)
+                        text("封装的 request<T>")
+                    }
+                    event {
+                        click {
+                            // requestGet
+                            // requestPost
+                            requestPost<String>(
+                                WanAPI.LOGIN,
+                                // 请求参数，默认值 null
+                                mapOf(
+                                    "username" to "123456",
+                                    "password" to "123456",
+                                ),
+                                // 状态码不在区间 [200, 300)，errorCode != 0，其它错误，默认值实现执行 `it.biz(this)`
+                                onFailure = {
+                                    it.biz(this)
+                                },
+                                // 响应成功，响应头，默认值 null
+                                onSuccessHeaders = {
+                                    // 数据类型是 Map<String, List<String>>
+                                    println(it)
+                                },
+                                // 响应成功，200 <= statusCode < 300， errorCode == 0
+                                onSuccess = {
+                                    // 数据类型是泛型。null 代表 Json 解析错误，后端接口问题
+                                    println(it)
+                                },
+                            )
+                        }
+                    }
+                }
+                TestItem {
+                    attr {
+                        marginTop(10f)
+                        text("封装的 request")
+                    }
+                    event {
+                        click {
+                            request(
+                                url = WanAPI.BASE_URL + WanAPI.LOGIN,
+                                // 默认值 false
+                                isPost = true,
+                                // 请求参数，自动处理 get 或 post 的参数，默认值 null
+                                params = mapOf(
+                                    "username" to "123456",
+                                    "password" to "123456",
+                                ),
+                                onResult = {
+                                    it.onFailure {
+                                        // 错误
+                                        it.biz(this)
+                                    }.onSuccess<String>({
+                                        // 响应头
+                                        println(it)
+                                    }) {
+                                        // 响应体
+                                        println(it)
+                                    }
+                                }
+                            )
+                        }
+                    }
                 }
                 TestItem {
                     attr {
@@ -279,7 +348,7 @@ internal class TestPage : BasePager() {
                                     header("Accept", "application/json") // 指定期望的响应内容类型
                                     header("Custom-Header", "CustomValue") // 自定义头
                                 }
-                                val result = httpResponse.body<BaseData<List<BannerItem>>>()
+                                val result = httpResponse.body<ApiResult<List<BannerItem>>>()
                                 println(result)
                                 toast("${result.data?.firstOrNull()?.title}")
                             }
@@ -338,7 +407,7 @@ internal class TestPage : BasePager() {
                 TestItem {
                     attr {
                         marginTop(10f)
-                        text("Native log")
+                        text("自定义 Module log")
                     }
                     event {
                         click {

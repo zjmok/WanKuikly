@@ -15,18 +15,14 @@ import com.tencent.kuikly.core.views.layout.Column
 import org.example.wan.kuikly.base.BasePager
 import org.example.wan.kuikly.data.SuperUserInfo
 import org.example.wan.kuikly.data.UserInfo
-import org.example.wan.kuikly.data.remote.CookiesUtils
 import org.example.wan.kuikly.data.remote.WanAPI
-import org.example.wan.kuikly.data.remote.biz
-import org.example.wan.kuikly.data.remote.onFailure
-import org.example.wan.kuikly.data.remote.onSuccess
-import org.example.wan.kuikly.data.remote.runResponseData
+import org.example.wan.kuikly.data.remote.requestGet
+import org.example.wan.kuikly.data.remote.requestPost
 import org.example.wan.kuikly.page.common.NavBar
 import org.example.wan.kuikly.utils.Background
 import org.example.wan.kuikly.utils.Fore
 import org.example.wan.kuikly.utils.bridgeModule
 import org.example.wan.kuikly.utils.ifNotNull
-import org.example.wan.kuikly.utils.networkModule
 import org.example.wan.kuikly.utils.postNotify
 import org.example.wan.kuikly.utils.routerModule
 import org.example.wan.kuikly.utils.sharedPreferencesModule
@@ -168,33 +164,67 @@ internal class LoginPage : BasePager() {
     }
 
     private fun login(userName: String, password: String) {
+
+        val path = WanAPI.LOGIN
+        val params = mapOf(
+            "username" to userName,
+            "password" to password,
+        )
+
+        requestPost<UserInfo>(path, params) {
+            // 登录接口返回的数据不完整，请求另一个接口获取完整数据
+            getUserInfo()
+        }
+
+        /*
         val url = WanAPI.BASE_URL + WanAPI.LOGIN
         val param = JSONObject().apply {
             put("username", userName)
             put("password", password)
         }
+
         networkModule.requestPost(url, param) { data, success, errorMsg, response ->
             runResponseData {
                 response to data
             }.onFailure {
                 it.biz(this)
             }.onSuccess<UserInfo>({
-                // 保存 Set-Cookie，以后在每次请求加上 Cookie
-                val cookiesList = it["Set-Cookie"] ?: run {
+                it?.let {
+                    // 保存 Set-Cookie，以后在每次请求加上 Cookie
+                    val cookiesList = it["Set-Cookie"] ?: run {
+                        toast("登录信息获取失败")
+                        return@onSuccess
+                    }
+                    val cookiesString = CookiesUtils.formatCookies(cookiesList)
+                    // save
+                    sharedPreferencesModule.setString("Cookie", cookiesString)
+                } ?: run {
                     toast("登录信息获取失败")
-                    return@onSuccess
                 }
-                val cookiesString = CookiesUtils.formatCookies(cookiesList)
-                // save
-                sharedPreferencesModule.setString("Cookie", cookiesString)
             }) {
                 // 登录接口返回的数据不完整，请求另一个接口获取完整数据
                 getUserInfo()
             }
         }
+        */
     }
 
     private fun getUserInfo() {
+
+        val path = WanAPI.USERINFO
+
+        requestGet<SuperUserInfo>(path) {
+            it.ifNotNull {
+                val json = it.toJson()
+                // save notify
+                sharedPreferencesModule.setString("superUserInfo", json)
+                postNotify("superUserInfo", JSONObject(json))
+                // close
+                bridgeModule.closePage()
+            }
+        }
+
+        /*
         // get
         val cookiesString = sharedPreferencesModule.getString("Cookie")
         println(cookiesString)
@@ -220,6 +250,7 @@ internal class LoginPage : BasePager() {
                 }
             }
         }
+        */
     }
 
 }

@@ -1,7 +1,20 @@
 package org.example.wan.kuikly.data.remote
 
+import org.example.wan.kuikly.utils.fromJson
+
 object CookiesUtils {
 
+    /**
+     * @param cookies Response Headers 的 Set-Cookie 值，通常是个 Json 数组
+     */
+    fun formatCookies(cookies: String): String {
+        val cookieList = fromJson<List<String>>(cookies) ?: return cookies
+        return formatCookies(cookieList)
+    }
+
+    /**
+     * @param cookies 处理过的 Response Headers 的 Set-Cookie 的值
+     */
     fun formatCookies(cookies: List<String>): String {
         /*
 [

@@ -124,7 +124,8 @@ internal class PersonView : ComposeView<PersonViewAttr, PersonViewEvent>() {
                                 }
                                 Text {
                                     attr {
-                                        text(ctx.superUserInfo?.userInfo?.nickname ?: "未登录")
+                                        val nickname = ctx.superUserInfo?.userInfo?.nickname
+                                        text(nickname?.let { it.takeIf { it.isNotBlank() } } ?: " 未登录 ")
                                         fontSize(20f)
                                         color(Color.PrimaryText)
                                     }
@@ -135,7 +136,8 @@ internal class PersonView : ComposeView<PersonViewAttr, PersonViewEvent>() {
                                     }
                                     Text {
                                         attr {
-                                            text("用户名: ${ctx.superUserInfo?.userInfo?.username}")
+                                            val username = ctx.superUserInfo?.userInfo?.username
+                                            text("用户名: ${username?.let { it.takeIf { it.isNotBlank() } } ?: "null"}")
                                             fontSize(16f)
                                             color(Color.SecondaryText)
                                         }
@@ -143,7 +145,8 @@ internal class PersonView : ComposeView<PersonViewAttr, PersonViewEvent>() {
                                     Text {
                                         attr {
                                             marginLeft(20f)
-                                            text("ID: ${ctx.superUserInfo?.userInfo?.id ?: -1}")
+                                            val id = ctx.superUserInfo?.userInfo?.id
+                                            text("ID: ${id ?: -1}")
                                             fontSize(16f)
                                             color(Color.SecondaryText)
                                         }
@@ -152,7 +155,8 @@ internal class PersonView : ComposeView<PersonViewAttr, PersonViewEvent>() {
                                 Text {
                                     attr {
                                         marginTop(8f)
-                                        text("邮箱: ${ctx.superUserInfo?.userInfo?.email}")
+                                        val email = ctx.superUserInfo?.userInfo?.email
+                                        text("邮箱: ${email?.let { it.takeIf { it.isNotBlank() } } ?: "null"}")
                                         fontSize(16f)
                                         color(Color.SecondaryText)
                                     }
@@ -302,7 +306,7 @@ internal class PersonView : ComposeView<PersonViewAttr, PersonViewEvent>() {
 //                                backgroundColor(Color.GRAY)
                             }
                         }
-                        // item test
+                        // item debug
                         View {
                             attr {
                                 alignItemsCenter()
@@ -313,8 +317,8 @@ internal class PersonView : ComposeView<PersonViewAttr, PersonViewEvent>() {
                             }
                             event {
                                 click {
-//                                    routerModule.openPage("test")
-                                    toast("开发中")
+                                    routerModule.openPage("debug")
+//                                    toast("开发中")
                                 }
                             }
                             Image {
@@ -327,8 +331,8 @@ internal class PersonView : ComposeView<PersonViewAttr, PersonViewEvent>() {
                                 attr {
                                     margin(left = 10f, right = 10f)
                                     flex(1f)
-//                                    text("TestPage")
-                                    text("item")
+                                    text("DebugPage")
+//                                    text("item")
                                     fontSize(18f)
                                 }
                             }
