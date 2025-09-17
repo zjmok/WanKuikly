@@ -15,7 +15,7 @@
 
 - Kuikly 2.4.0
 - Kotlin 2.0.21
-- Kotlin OHOS 2.0.21-KBA-004
+- Kotlin OHOS 2.0.21-KBA-010
 
 当前只在 Android 平台正常运行，未调试其它平台
 
@@ -86,7 +86,15 @@ KuiklyTemplate 1.2.0
 
 ## OHOS
 
-截至 0823, OHOS 仅支持 MacOS 编译
+配置
+
+- `2.0.21-KBA-010` 版本, 已支持 Windows 编译
+  - 插件（根目录的 `build.ohos.gradle.kts`） 相关版本修改为 `2.0.21-KBA-010`
+  - 项目依赖库（`shared/build.ohos.gradle.kts`） 相关版本修改为 `2.4.0-2.0.21-ohos`
+
+- 设置环境变量 'OHOS_SDK_HOME=/path/to/openharmony' or 'DEVECO_STUDIO_HOME=/path/to/DevEco-Studio'
+
+---
 
 编译或运行前，需要手动复制 assets 资源
 
@@ -101,8 +109,8 @@ cp shared/src/commonMain/assets ohos/entry/src/main/resource/resfile
 ```
 
 ```
-cp build/bin/ohosArm64/releaseShared/libshared.so ohosApp/entry/libs/arm64-v8a/libshared.so
-cp build/bin/ohosArm64/releaseShared/libshared_api.h ohosApp/entry/src/main/cpp/libshared_api.h
+cp shared/build/bin/ohosArm64/releaseShared/libshared.so ohosApp/entry/libs/arm64-v8a/libshared.so
+cp shared/build/bin/ohosArm64/releaseShared/libshared_api.h ohosApp/entry/src/main/cpp/libshared_api.h
 ```
 
 - 或在 DevEco 运行，会使用 hvigor 脚本执行编译命令，并复制 so 和头文件到 ohosApp 中
@@ -238,3 +246,8 @@ kotlin 2.0 以上运行:
 # 然后构建宿主 APP
 ./gradlew :h5App:publishLocalJSBundle
 ```
+
+遇到问题
+
+- Lock 锁相关报错，`./gradlew kotlinUpgradeYarnLock` 更新后再次执行
+- kotlinx.serialization ktor 等，不兼容 ohos

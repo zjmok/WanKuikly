@@ -23,6 +23,24 @@ kotlin {
         publishLibraryVariants("release")
     }
 
+    iosX64()
+    iosArm64()
+    iosSimulatorArm64()
+    cocoapods {
+        summary = "Some description for the Shared Module"
+        homepage = "Link to the Shared Module homepage"
+        version = "1.0"
+        ios.deploymentTarget = "14.1"
+        podfile = project.file("../iosApp/Podfile")
+        framework {
+            baseName = "shared"
+            freeCompilerArgs = freeCompilerArgs + getCommonCompilerArgs()
+            isStatic = true
+            license = "MIT"
+        }
+        extraSpecAttributes["resources"] = "['src/commonMain/assets/**']"
+    }
+
     js(IR) {
         browser {
             webpackTask {
@@ -40,25 +58,6 @@ kotlin {
         binaries.executable() //将kotlin.js与kotlin代码打包成一份可直接运行的js文件
     }
 
-    iosX64()
-    iosArm64()
-    iosSimulatorArm64()
-
-    cocoapods {
-        summary = "Some description for the Shared Module"
-        homepage = "Link to the Shared Module homepage"
-        version = "1.0"
-        ios.deploymentTarget = "14.1"
-        podfile = project.file("../iosApp/Podfile")
-        framework {
-            baseName = "shared"
-            freeCompilerArgs = freeCompilerArgs + getCommonCompilerArgs()
-            isStatic = true
-            license = "MIT"
-        }
-        extraSpecAttributes["resources"] = "['src/commonMain/assets/**']"
-    }
-
     sourceSets {
         val ktorVersion = "3.1.3" // 3.2.3 // 3.1.3 // 3.0.3
         val okioVersion = "3.10.2"
@@ -73,18 +72,27 @@ kotlin {
 
                 // kotlin 协程
                 // https://mvnrepository.com/artifact/org.jetbrains.kotlinx/kotlinx-coroutines-core
-                implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:${Version.KOTLINX_COROUTINES_VERSION}")
+                // ohos 不兼容
+//                implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:${Version.KOTLINX_COROUTINES_VERSION}")
+
                 // kuiklyx 内建协程
                 // https://kuikly.tds.qq.com/DevGuide/thread-and-coroutines.html#kuikly协程api和依赖库
                 implementation("com.tencent.kuiklyx-open:coroutines:${Version.KUIKLYX_COROUTINES_VERSION}")
+                // ohos 兼容版本
+//                implementation("com.tencent.kuiklyx-open:coroutines:${Version.KUIKLYX_COROUTINES_OHOS_VERSION}")
+
                 // kotlinx-serialization
                 // https://mvnrepository.com/artifact/org.jetbrains.kotlinx/kotlinx-serialization-json
-                implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:${Version.KOTLINX_SERIALIZATION_VERSION}")
+//                implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:${Version.KOTLINX_SERIALIZATION_VERSION}")
+                // ohos 兼容版本
+                implementation("com.github.trhyl:kotlinx.serialization:v1.8.1")
+
                 // ktor
                 // https://mvnrepository.com/artifact/io.ktor/ktor-client-core
                 implementation("io.ktor:ktor-client-core:$ktorVersion") // 核心库
                 implementation("io.ktor:ktor-client-content-negotiation:$ktorVersion") // 内容协商（用于JSON序列化）
                 implementation("io.ktor:ktor-serialization-kotlinx-json:$ktorVersion") // Kotlinx.serialization JSON支持
+
                 // okio, js 使用 node.js 实现
                 // https://square.ac.cn/okio/multiplatform/
 //                implementation("com.squareup.okio:okio:$okioVersion")

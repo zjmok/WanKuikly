@@ -4,7 +4,7 @@ plugins {
     id("com.android.library")
     id("com.google.devtools.ksp")
     id("maven-publish")
-    id("com.tencent.kuikly-open.kuikly")
+//    id("com.tencent.kuikly-open.kuikly")
     kotlin("plugin.serialization")
 
 }
@@ -24,7 +24,6 @@ kotlin {
     iosX64()
     iosArm64()
     iosSimulatorArm64()
-
     cocoapods {
         summary = "Some description for the Shared Module"
         homepage = "Link to the Shared Module homepage"
@@ -45,28 +44,57 @@ kotlin {
     }
 
     sourceSets {
+        val ktorVersion = "3.1.3" // 3.2.3 // 3.1.3 // 3.0.3
+        val okioVersion = "3.10.2"
         val commonMain by getting {
             dependencies {
                 implementation("com.tencent.kuikly-open:core:${Version.getKuiklyOhosVersion()}")
                 implementation("com.tencent.kuikly-open:core-annotations:${Version.getKuiklyOhosVersion()}")
 
-                // TODO
+                // 需要注意，使用的库是否支持多平台，或纯 kotlin 实现
+
+                // kotlin 协程
+                // https://mvnrepository.com/artifact/org.jetbrains.kotlinx/kotlinx-coroutines-core
+                // ohos 不兼容
+//                implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:${Version.KOTLINX_COROUTINES_VERSION}")
+
+                // kuiklyx 内建协程
+                // https://kuikly.tds.qq.com/DevGuide/thread-and-coroutines.html#kuikly协程api和依赖库
+//                implementation("com.tencent.kuiklyx-open:coroutines:${Version.KUIKLYX_COROUTINES_VERSION}")
+                // ohos 兼容版本
+                implementation("com.tencent.kuiklyx-open:coroutines:${Version.KUIKLYX_COROUTINES_OHOS_VERSION}")
+
+                // kotlinx-serialization
+                // https://mvnrepository.com/artifact/org.jetbrains.kotlinx/kotlinx-serialization-json
+//                implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:${Version.KOTLINX_SERIALIZATION_VERSION}")
+                // ohos 兼容版本
+                implementation("com.github.trhyl:kotlinx.serialization:${Version.KOTLINX_SERIALIZATION_VERSION}")
+
+                // ktor
+                // https://mvnrepository.com/artifact/io.ktor/ktor-client-core
+                implementation("io.ktor:ktor-client-core:$ktorVersion") // 核心库
+                implementation("io.ktor:ktor-client-content-negotiation:$ktorVersion") // 内容协商（用于JSON序列化）
+                implementation("io.ktor:ktor-serialization-kotlinx-json:$ktorVersion") // Kotlinx.serialization JSON支持
+
+                // okio, js 使用 node.js 实现
+                // https://square.ac.cn/okio/multiplatform/
+//                implementation("com.squareup.okio:okio:$okioVersion")
 
             }
         }
         val commonTest by getting {
             dependencies {
                 implementation(kotlin("test"))
+//                api("com.squareup.okio:okio-fakefilesystem:$okioVersion")
             }
         }
+
         val androidMain by getting {
             dependencies {
                 api("com.tencent.kuikly-open:core-render-android:${Version.getKuiklyOhosVersion()}")
-            }
-        }
-        val jsMain by getting
-        jsMain.dependencies {
 
+                api("io.ktor:ktor-client-okhttp:$ktorVersion")
+            }
         }
 
         val iosX64Main by getting
@@ -79,7 +107,7 @@ kotlin {
             iosSimulatorArm64Main.dependsOn(this)
         }
         iosMain.dependencies {
-
+            api("io.ktor:ktor-client-darwin:$ktorVersion")
         }
         val iosX64Test by getting
         val iosArm64Test by getting
@@ -90,6 +118,15 @@ kotlin {
             iosArm64Test.dependsOn(this)
             iosSimulatorArm64Test.dependsOn(this)
         }
+
+        // 鸿蒙是 Kotlin Native 的目标平台
+        val ohosArm64Main by getting {
+            dependencies {
+//                implementation("...")
+//                api("io.ktor:ktor-client-js:$ktorVersion")
+            }
+        }
+
     }
 }
 
